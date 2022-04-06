@@ -56,8 +56,10 @@
                 "${file}",
                 "-o",
                 "${fileDirname}/${fileBasenameNoExtension}",
-                "castillo.txt",
-                
+                "./ssooiigle",
+                "test.txt",
+                "david", 
+                "2"
             ],
             "options": {
                 "cwd": "${fileDirname}"
