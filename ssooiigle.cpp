@@ -13,6 +13,26 @@
 #include <queue>
 #include <functional>
 
+class ResultadoBusqueda{
+    std::string palabraAnterior;
+    std::string palabraPosterior;
+    int lineaResultado;
+};
+
+class Buscador
+{
+    std::string palabraBuscada;
+    int id;
+    int lineaInicio;
+    int lineaFinal;
+
+    public:
+    std::queue<ResultadoBusqueda> colaResultados;
+    Buscador(std::string palabra, int Id, int lineaAnt, int lineaPost): palabraBuscada(palabra), id(Id), lineaInicio(lineaAnt), lineaFinal(lineaPost){}
+};
+
+
+
 std::fstream fp;
 std::vector<std::string> leerFichero(std::string rutaFichero);
 int leerLineas();
@@ -92,27 +112,15 @@ void buscarPalabra(std::vector<std::string> vector, Buscador buscador){
 
 }
 
-class Buscador
-{
-    public:
-    Buscador(std::string, int, int, int);
-    std::string palabraBuscada;
-    int id;
-    int lineaInicio;
-    int lineaFinal;
-    std::queue<ResultadoBusqueda> colaResultados;
-};
-Buscador::Buscador(std::string palabraBuscada, int id, int lineaInicio, int lineaFinal)
-{
-    this->palabraBuscada= palabraBuscada;
-    this->id= id;
-    this->lineaInicio=lineaInicio;
-    this->lineaFinal=lineaFinal;
-}
 
-class ResultadoBusqueda{
-    std::string palabraAnterior;
-    std::string palabraPosterior;
-    int lineaResultado;
-};
+/*
+Buscador::Buscador(std::string palabra, int Id, int lineaAnt, int lineaPost)
+{
+    this->palabraBuscada= palabra;
+    this->id= Id;
+    this->lineaInicio=lineaAnt;
+    this->lineaFinal=lineaPost;
+}*/
+
+
 
