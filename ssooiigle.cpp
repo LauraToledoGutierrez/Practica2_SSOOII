@@ -56,7 +56,10 @@ class Buscador
     {
         colaResultados= resultados;
     }
-
+    void setId(int id)
+    {
+        this->id = id;
+    }
     int getId()
     {
         return id;
@@ -66,10 +69,18 @@ class Buscador
     {
         return lineaInicio;
     }
+    void setLineaInicio(int lineaFinal)
+    {
+        this->lineaInicio = lineaInicio;
+    }
 
     int getLineaFinal()
     {
         return lineaFinal;
+    }
+    void setLineaFinal(int lineaFinal)
+    {
+        this->lineaFinal = lineaFinal;
     }
 
     std::queue<ResultadoBusqueda> getColaResultados()
@@ -78,14 +89,14 @@ class Buscador
     }
 };
 
-
-
 std::fstream fp;
 std::vector<std::string> leerFichero(std::string rutaFichero);
 int leerLineas();
 void buscarPalabra(std::vector<std::string> vector, Buscador buscador);
 std::string eliminarSimbolos(std::string linea);
 void imprimir(std::vector<Buscador> buscador);
+
+
 int main(int argc, char *argv[]){
     
     if(argc!=4){
@@ -166,6 +177,7 @@ void buscarPalabra(std::vector<std::string> vector, Buscador buscador){
         std::string linea= vector[i];
         std::istringstream trocearLinea(linea);
         std::copy(std::istream_iterator<std::string>(trocearLinea), std::istream_iterator<std::string>(), back_inserter(palabras));
+        
         for(int j=0; j<palabras.size(); j++){
             if(palabras[j].compare(buscador.getPalabraBuscada())==0)
             {
@@ -185,8 +197,6 @@ void buscarPalabra(std::vector<std::string> vector, Buscador buscador){
         }
         palabras.clear();
     }
-
-
     buscador.setColaResultados(colaResultados);
 }
 std::string eliminarSimbolos(std::string linea)
@@ -201,6 +211,28 @@ std::string eliminarSimbolos(std::string linea)
     }
     return linea;
 }
+
+/*void creacionHilos(int nHilos, std::vector<std::string> vectorFrag, std::vector<std::string> vectorLineas, std::string palabraBuscar){
+    std::vector<std::thread> Vhilos;
+    for(int i=0; i<nHilos;i++){
+        Vhilos.push_back(std::thread(asignarLineas, i, std::ref(vectorFrag), Vhilos, palabraBuscar));
+        std::this_thread::sleep_for(std::chrono::milliseconds(500));
+    }
+    std::for_each(Vhilos.begin(), Vhilos.end(), std::mem_fn(&std::thread::join));
+}*/
+/*void asignarLineas(int i, std::vector<std::string> vectorFrag, std::vector<int> vectorLineas, std::string palabraBuscar){
+
+    int lim1 = i*vectorLineas[0]+1;
+    int lim2 = lim1+vectorLineas[i]-1;
+
+    Buscador buscador;
+    buscador.setId(i);
+    buscador.setLineaInicio(lim1);
+    buscador.setLineaFinal(lim2);
+
+    vectorFrag.push_back(buscador);
+    buscarPalabra(palabraBuscar, buscador);
+}*/
 
 void imprimir(std::vector<Buscador> buscadorHilos)
 {
