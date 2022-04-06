@@ -19,6 +19,7 @@ class ResultadoBusqueda{
     int lineaResultado;
 };
 
+
 class Buscador
 {
     std::string palabraBuscada;
