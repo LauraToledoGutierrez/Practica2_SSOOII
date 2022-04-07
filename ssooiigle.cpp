@@ -106,6 +106,8 @@ std::string eliminarSimbolos(std::string linea);
 void imprimir();
 
 std::vector<Buscador> buscadorHilos;
+std::queue<ResultadoBusqueda> colaResultados;
+
 std::mutex semaforo_;
 
 
@@ -183,14 +185,11 @@ int leerLineas(){
     return lineasFichero;
 }
 */
-
 void buscarPalabra(int iteracion, std::vector<std::string> vector){
     std::vector<std::string> palabras;
     std::queue<ResultadoBusqueda> colaResultados;
     ResultadoBusqueda resultados;
     
-
-
     for(int i=0; i<vector.size(); i++){
         std::string linea=eliminarSimbolos(vector[i]);
         std::transform(linea.begin(), linea.end(), linea.begin(), ::tolower);
@@ -216,6 +215,7 @@ void buscarPalabra(int iteracion, std::vector<std::string> vector){
             }
         }
         palabras.clear();
+        
     }
     
     std::lock_guard<std::mutex> lockGuard_(semaforo_);
@@ -259,13 +259,21 @@ std::string eliminarSimbolos(std::string linea)
 
 void imprimir()
 {
+    Buscador buscador;
+    
     for(int i=0; i<buscadorHilos.size(); i++)
     {
         if(!buscadorHilos[i].getColaResultados().empty()){
-            std::cout<<"Hilo: "<<buscadorHilos[i].getId()<< " Inicio:"<<buscadorHilos[i].getLineaInicio()
-                <<" - final: "<<buscadorHilos[i].getLineaFinal()<<" "<<std::endl;
-            buscadorHilos[i].getColaResultados().pop();
+
+            for(int j=0;j<buscadorHilos[i].getColaResultados().size();j++){
+                std::cout<<"Hilo: "<<buscadorHilos[i].getId()<< " Inicio:"<<buscadorHilos[i].getLineaInicio()
+                    <<" - final: "<<buscadorHilos[i].getLineaFinal()<<" "<<buscadorHilos[i].getPalabraBuscada()<<" "
+                    <<std::endl;
+
+                buscadorHilos[i].getColaResultados().pop();
+            }
         }
+
     }
 }
 
