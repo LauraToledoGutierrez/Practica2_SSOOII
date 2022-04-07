@@ -261,7 +261,7 @@ void imprimir()
 {
     for(int i=0; i<buscadorHilos.size(); i++)
     {
-        while(!buscadorHilos[i].getColaResultados().empty()){
+        if(!buscadorHilos[i].getColaResultados().empty()){
             std::cout<<"Hilo: "<<buscadorHilos[i].getId()<< " Inicio:"<<buscadorHilos[i].getLineaInicio()
                 <<" - final: "<<buscadorHilos[i].getLineaFinal()<<" "<<std::endl;
             buscadorHilos[i].getColaResultados().pop();
