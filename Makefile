@@ -1,6 +1,6 @@
-FILE := prueba.txt
-WORD := david
-NTHREADS := 3
+FILE := El-oro-y-la-ceniza.txt
+WORD := superviviente
+NTHREADS := 20
 
 DIROBJ := obj/
 DIREXE := exec/

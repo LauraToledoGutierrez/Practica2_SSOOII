@@ -27,6 +27,7 @@ int main(int argc, char *argv[])
         std::cout << ROJO << "Numero de argumentos incorrecto! <nombre_fichero> <palabra> <numero_hilos>" << std::endl;
         exit(1);
     }
+    std::cout << RESET << "\nBienvenido a " << AZUL << "SS" <<ROJO<< "O"<< AMARILLO <<"O"<<AZUL<<"II"<<VERDE<< "GL"<<ROJO<< "E\n"<<std::endl;
 
     /*Guardamos los argumentos en variables*/
     std::string rutaFichero(argv[1]);
@@ -37,7 +38,6 @@ int main(int argc, char *argv[])
     int numeroLineas = lineas.size();
 
     crearHilos(numeroHilos, numeroLineas, palabraBuscada, lineas);
-
     imprimir();
 }
 
@@ -155,6 +155,7 @@ std::string eliminarSimbolos(std::string linea)
 /*Imprimimos los resultados*/
 void imprimir()
 {
+    int contador=0;
 
     for (int i = 0; i < buscadorHilos.size(); i++)
     {
@@ -170,7 +171,11 @@ void imprimir()
             std::cout << ROJO << buscadorHilos[i].getPalabraBuscada() << " ";
             std::cout << AZUL << cola.front().getPalabraPosterior() << " ..." << std::endl;
 
+            contador++;
             cola.pop();
         }
     }
+    std::cout<<RESET<<"\nLa palabra "<<ROJO<<buscadorHilos[0].getPalabraBuscada()<<RESET<<" aparece " <<ROSITA<< contador <<RESET<< " veces\n" <<" "<<std::endl;
+    std::cout << RESET << "Fin de " << AZUL << "SS" <<ROJO<< "O"<< AMARILLO <<"O"<<AZUL<<"II"<<VERDE<< "GL"<<ROJO<< "E"<<std::endl;
+
 }
