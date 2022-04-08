@@ -40,7 +40,7 @@ int main(int argc, char *argv[]){
         int limiteInferior, limiteSuperior;
         /*Si es el primer hilo*/
         if(i==0)
-            limiteInferior=0;
+            limiteInferior=1;
         else
            limiteInferior=((numeroLineas/numeroHilos)*i+1);
         
@@ -55,7 +55,7 @@ int main(int argc, char *argv[]){
         Buscador buscador(palabraBuscada, i, limiteInferior, limiteSuperior);
         buscadorHilos.push_back(buscador);
         
-        for(int j=limiteInferior; j<=limiteSuperior;j++){
+        for(int j=limiteInferior-1; j<limiteSuperior;j++){
             vectorParcial.push_back(lineas[j]);
         }
         /*Cada hilo realizara el metodo de buscarPalabra*/
@@ -64,6 +64,7 @@ int main(int argc, char *argv[]){
     
     std::for_each(vhilos.begin(), vhilos.end(), std::mem_fn(&std::thread::join));
     imprimir();
+    
 }
 
 /*void crearHilos(int numHilos, int numeroLineas, std::string palabraBuscar, std::vector<std::string>lineas){
@@ -130,8 +131,8 @@ void buscarPalabra(int iteracion, std::vector<std::string> vector)
             if(palabras[j].compare(buscadorHilos[iteracion].getPalabraBuscada())==0)
             {
                 lineaR = buscadorHilos[iteracion].getLineaInicio();
-                std::cout<<"Palabra encontrada en linea "<<i+1+lineaR<<std::endl;
-                resultados.setLineaResultado(i+1+lineaR);
+                //std::cout<<"Palabra encontrada en linea "<<i+1+lineaR<<std::endl;
+                resultados.setLineaResultado(i+lineaR);
                 /*Si es la primera palabra de la linea*/
                 if(j==0)
                     resultados.setPalabraAnterior("---");
@@ -142,9 +143,11 @@ void buscarPalabra(int iteracion, std::vector<std::string> vector)
                     resultados.setPalabraPosterior("---");
                 else
                     resultados.setPalabraPosterior(palabras[j+1]);
+                
+                //resultados.toString(resultados);
                 /*Metemos los resultados en la cola resultados*/    
-                colaResultados.push(resultados);
-                //colaResultados.pop();
+                colaResultados.push(resultados);  
+                buscadorHilos[iteracion].toString(buscadorHilos[iteracion]);
             }
         }
         palabras.clear();
@@ -170,23 +173,22 @@ std::string eliminarSimbolos(std::string linea)
 /*Imprimimos los resultados*/
 void imprimir()
 {
-    Buscador buscador;    
     for(int i=0; i<buscadorHilos.size(); i++)
     {
-        if(!buscadorHilos[i].getColaResultados().empty()){
-
-            for(int j=0;j<buscadorHilos[i].getColaResultados().size();j++){
-                std::cout<<AZUL<<"[Hilo: "<<buscadorHilos[i].getId();
-                std::cout<<ROJO<< " Inicio: "<<buscadorHilos[i].getLineaInicio();
-                std::cout<<AMARILLO<<" - final: "<<buscadorHilos[i].getLineaFinal()<<"]";
-                std::cout<<AZUL<<" :: linea "<<buscadorHilos[i].getColaResultados().front().getLineaResultado()<<" ";
-                std::cout<<VERDE<<"... "<<buscadorHilos[i].getColaResultados().front().getPalabraAnterior()<< " ";
-                std::cout<<ROJO<<buscadorHilos[i].getPalabraBuscada()<< " ";
-                std::cout<<AZUL<<buscadorHilos[i].getColaResultados().front().getPalabraPosterior()<<" ..."<<std::endl;
-                  
-            }
-        }
-
+    int contador=buscadorHilos[i].getColaResultados().size();
+      while(contador!=0){
+            std::cout<<AZUL<<"[Hilo: "<<buscadorHilos[i].getId();
+            std::cout<<ROJO<< " Inicio: "<<buscadorHilos[i].getLineaInicio();
+            std::cout<<AMARILLO<<" - final: "<<buscadorHilos[i].getLineaFinal()<<"]";
+            std::cout<<AZUL<<" :: linea "<<buscadorHilos[i].getColaResultados().front().getLineaResultado()<<" ";
+            std::cout<<VERDE<<"... "<<buscadorHilos[i].getColaResultados().front().getPalabraAnterior()<< " ";
+            std::cout<<ROJO<<buscadorHilos[i].getPalabraBuscada()<< " ";
+            std::cout<<AZUL<<buscadorHilos[i].getColaResultados().front().getPalabraPosterior()<<" ..."<<std::endl;
+            //buscadorHilos[i].getColaResultados().front().toString(buscadorHilos[i].getColaResultados().front());    
+            
+        contador--;
+      }
+    buscadorHilos[i].getColaResultados().pop();
     }
 }
 
