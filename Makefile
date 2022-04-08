@@ -7,8 +7,7 @@ DIREXE := exec/
 DIRHEA := include/
 DIRSRC := src/
 DIRBOOKS := Libros_P2/
-CFLAGS := -I$(DIRHEA) -c -Wall -ansi
-CPPFLAGS:= -I$(DIRHEA) -c -Wall -std=c++11
+CPPFLAGS:= -I$(DIRHEA) -c -std=c++11
 LDLIBS := -pthread
 CC := g++
 
