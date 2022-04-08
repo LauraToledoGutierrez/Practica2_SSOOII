@@ -7,6 +7,13 @@ class Resultado_Busqueda
         std::string palabraPosterior;
         int lineaResultado;
     public:
+        Resultado_Busqueda(){}
+        Resultado_Busqueda(std::string palabraAnterior, std::string palabraPosterior, int lineaResultado){
+            this->palabraAnterior = palabraAnterior;
+            this->palabraPosterior = palabraPosterior;
+            this->lineaResultado = lineaResultado;
+        }
+
         void setPalabraAnterior(std::string palabra)
         {
             palabraAnterior=palabra;

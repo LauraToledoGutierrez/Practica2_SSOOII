@@ -1,5 +1,7 @@
 #ifndef Resultado_Busqueda
 
+#include <iostream>
+#include <queue>
 class Resultado_Busqueda
 {
     private:
@@ -53,7 +55,7 @@ class Buscador
 
         void setColaResultados(std::queue<Resultado_Busqueda> resultados)
         {
-            colaResultados= resultados;
+            colaResultados = resultados;
         }
         void setId(int id)
         {
