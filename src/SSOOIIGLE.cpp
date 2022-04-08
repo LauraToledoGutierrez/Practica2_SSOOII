@@ -42,7 +42,7 @@ int main(int argc, char *argv[]){
         if(i==0)
             limiteInferior=0;
         else
-            limiteInferior=((numeroLineas/numeroHilos)*i+1);
+           limiteInferior=((numeroLineas/numeroHilos)*i+1);
         
         /*Si es el ultimo hilo*/
         if(i==numeroHilos-1)
@@ -113,6 +113,7 @@ void buscarPalabra(int iteracion, std::vector<std::string> vector)
     std::vector<std::string> palabras;
     std::queue<Resultado_Busqueda> colaResultados;
     Resultado_Busqueda resultados;
+    int lineaR;
     
     for(int i=0; i<vector.size(); i++){
         
@@ -128,8 +129,9 @@ void buscarPalabra(int iteracion, std::vector<std::string> vector)
             /*Si la palabra que estamos mirando es igual a la que buscamos*/
             if(palabras[j].compare(buscadorHilos[iteracion].getPalabraBuscada())==0)
             {
-                //std::cout<<"Palabra encontrada en linea "<<i+1+buscadorHilos[iteracion].getLineaInicio()<<std::endl;
-                resultados.setLineaResultado(i+1);
+                lineaR = buscadorHilos[iteracion].getLineaInicio();
+                std::cout<<"Palabra encontrada en linea "<<i+1+lineaR<<std::endl;
+                resultados.setLineaResultado(i+1+lineaR);
                 /*Si es la primera palabra de la linea*/
                 if(j==0)
                     resultados.setPalabraAnterior("---");
@@ -168,8 +170,7 @@ std::string eliminarSimbolos(std::string linea)
 /*Imprimimos los resultados*/
 void imprimir()
 {
-    Buscador buscador;
-    
+    Buscador buscador;    
     for(int i=0; i<buscadorHilos.size(); i++)
     {
         if(!buscadorHilos[i].getColaResultados().empty()){
@@ -182,8 +183,7 @@ void imprimir()
                 std::cout<<VERDE<<"... "<<buscadorHilos[i].getColaResultados().front().getPalabraAnterior()<< " ";
                 std::cout<<ROJO<<buscadorHilos[i].getPalabraBuscada()<< " ";
                 std::cout<<AZUL<<buscadorHilos[i].getColaResultados().front().getPalabraPosterior()<<" ..."<<std::endl;
-                
-                //buscadorHilos[i].getColaResultados().pop();
+                  
             }
         }
 
