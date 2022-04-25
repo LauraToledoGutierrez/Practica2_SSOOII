@@ -2,7 +2,7 @@
 
 /*Includes*/
 #include "definitions.h"
-#include "clases.h"
+#include "buscador.h"
 #include "colores.h"
 
 /*Variables globales*/
