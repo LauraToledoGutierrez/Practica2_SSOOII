@@ -9,6 +9,7 @@
 std::vector<Buscador> buscadorHilos;
 std::queue<Resultado_Busqueda> colaResultados;
 std::mutex semaforo_;
+std::vector<std::string> rutaLibros;
 
 std::vector<std::string> leerFichero(std::string rutaFichero);
 int leerLineas();
@@ -17,6 +18,13 @@ void crearHilos(int numeroLineas, int numeroHilos, std::string palabraBuscada, s
 void buscarPalabra(int iteracion, std::vector<std::string> vector);
 std::string eliminarSimbolos(std::string linea);
 void imprimir();
+void crearRuta();
+
+std::vector<std::string> libros = {"17-LEYES-DEL-TRABJO-EN-EQUIPO.txt", "21-LEYES-DEL-LIDERAZGO.txt", "25-MANERAS-DE-GANARSE-A-LA-GENTE.txt",
+                        "ACTITUD-DE-VENDEDOR.txt", "El-oro-y-la-ceniza.txt", "La-última-sirena.txt", "prueba.txt", 
+                        "SEAMOS-PERSONAS-DE-INFLUENCIA.txt", "VIVE-TU-SUEÑO.txt"};
+
+std::vector<std::string> diccionario = {"casa", "telefono", "final"};
 
 int main(int argc, char *argv[])
 {
@@ -39,6 +47,14 @@ int main(int argc, char *argv[])
 
     crearHilos(numeroHilos, numeroLineas, palabraBuscada, lineas);
     imprimir();
+}
+
+void crearRuta()
+{
+    std::string ruta = "Libros_P2/";
+    for (int i = 0; i < (int)libros.size(); i++) {
+        rutaLibros.push_back(ruta + libros[i]);
+    }
 }
 
 void crearHilos(int numeroHilos,int numeroLineas,std::string palabraBuscada,std::vector<std::string> lineas)
@@ -74,6 +90,10 @@ void crearHilos(int numeroHilos,int numeroLineas,std::string palabraBuscada,std:
     }
 
     std::for_each(vhilos.begin(), vhilos.end(), std::mem_fn(&std::thread::join));
+}
+
+void crearHilos2 (int numeroHilos,int numeroLineas,std::string palabraBuscada,std::vector<std::string> lineas){
+    
 }
 
 /*Leemos el fichero para sacar las lineas*/
