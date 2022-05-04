@@ -4,24 +4,28 @@
 
 class Cliente{
     int idCliente;
-    std::string tipo;
+    int tipo;   //0: Premium
+                //1: Premium con saldo
+                //2: Gratuita
     int saldo;
 
     Cliente(){}
-    Cliente(int idCliente, std::string tipo, int saldo): idCliente(idCliente), tipo(tipo), saldo(saldo){}
+    Cliente(int idCliente, int tipo): idCliente(idCliente), tipo(tipo), saldo(saldo){}
 
-    void asignarSaldo(std::string tipo) {
+    void asignarSaldo(int tipo) {
 
         srand(time(NULL));
 
-        if(tipo.compare("premiumL") == 0){
-            saldo = 1 + rand() % (100 - 1);        
-        }
-        else if (tipo.compare("gratis")==0) {
-            saldo = 1 + rand() % (30 - 1); 
-        }
-        else {
-            saldo = INT_MAX; 
+        switch(tipo){
+            case 0:
+                saldo=INT_MAX;
+                break;
+            case 1:
+                saldo= 1+ rand()% (100 - 1);       
+                break;
+            case 2:
+                saldo = 1 + rand() % (30 - 1); 
+                break;
         }
     }
     int getidCliente() {
@@ -32,7 +36,7 @@ class Cliente{
         this->idCliente = idC;
     }
 
-    std::string getTipo() {
+    int getTipo() {
         return tipo;
     }
 
