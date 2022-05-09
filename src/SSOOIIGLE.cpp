@@ -129,7 +129,7 @@ void createClient (int nThread,int nLines,std::string searchWord,std::vector<std
 void launchThreads(){
     int nThreads = 0;
     std::vector<std::thread> vThread;
-    for(int i=0; i<nThreads;i+++){
+    for(int i=0; i<nThreads;i++){
         if(i==0){
             vThread.push_back(std::thread(systemPay));
         }
