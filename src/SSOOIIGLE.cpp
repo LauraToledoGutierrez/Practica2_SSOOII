@@ -9,26 +9,26 @@
 #define NUMEROCLIENTES 10
 
 /*Variables globales*/
-std::vector<Buscador> buscadorHilos;
-std::queue<Resultado_Busqueda> colaResultados;
-std::queue<Peticion> peticionClienteGratuito;
-std::queue<Peticion> peticionClientePremium;
-std::mutex semaforo_;
-std::vector<std::string> rutaLibros;
+std::vector<Buscador> threadFinder;
+std::queue<Resultado_Busqueda> queueResults;
+std::queue<Peticion> clientRequestFree;
+std::queue<Peticion> clientRequestPremium;
+std::mutex mutex;
+std::vector<std::string> bookPath;
 
-std::vector<std::string> leerFichero(std::string rutaFichero);
-int leerLineas();
-void crearClientes(int numeroLineas, int numeroHilos, std::string palabraBuscada, std::vector<std::string> lineas);
-void buscarPalabra(int iteracion, std::vector<std::string> vector);
-std::string eliminarSimbolos(std::string linea);
-void imprimir();
-void crearRuta();
+std::vector<std::string> readFile(std::string bookPath);
+int readLines();
+void creatClient(int nLines, int nThread, std::string searchWord, std::vector<std::string> vLines);
+void findWord(int iteration, std::vector<std::string> vector);
+std::string eraseSymbols(std::string line);
+void printResults();
+void creatPath();
 
-std::vector<std::string> libros = {"17-LEYES-DEL-TRABJO-EN-EQUIPO.txt", "21-LEYES-DEL-LIDERAZGO.txt", "25-MANERAS-DE-GANARSE-A-LA-GENTE.txt",
+std::vector<std::string> books = {"17-LEYES-DEL-TRABJO-EN-EQUIPO.txt", "21-LEYES-DEL-LIDERAZGO.txt", "25-MANERAS-DE-GANARSE-A-LA-GENTE.txt",
                         "ACTITUD-DE-VENDEDOR.txt", "El-oro-y-la-ceniza.txt", "La-última-sirena.txt", "prueba.txt", 
                         "SEAMOS-PERSONAS-DE-INFLUENCIA.txt", "VIVE-TU-SUEÑO.txt"};
 
-std::vector<std::string> diccionario = {"casa", "telefono", "final"};
+std::vector<std::string> dictionary = {"casa", "telefono", "final"};
 
 
 int main(int argc, char *argv[])
@@ -43,22 +43,22 @@ int main(int argc, char *argv[])
     std::cout << RESET << "\nBienvenido a " << AZUL << "SS" <<ROJO<< "O"<< AMARILLO <<"O"<<AZUL<<"II"<<VERDE<< "GL"<<ROJO<< "E\n"<<std::endl;
 
     /*Guardamos los argumentos en variables*/
-    std::string rutaFichero(argv[1]);
-    std::string palabraBuscada = argv[2];
-    int numeroHilos = atoi(argv[3]);
+    std::string bookPath(argv[1]);
+    std::string searchWord = argv[2];
+    int nThread = atoi(argv[3]);
 
-    std::vector<std::string> lineas = leerFichero(rutaFichero);
-    int numeroLineas = lineas.size();
+    std::vector<std::string> vLines = readFile(bookPath);
+    int nLines = vLines.size();
 
-    crearClientes(numeroHilos, numeroLineas, palabraBuscada, lineas);
-    imprimir();
+    creatClient(nThread, nLines, searchWord, vLines);
+    printResults();
 }
 
-void crearRuta()
+void creatPath()
 {
-    std::string ruta = "Libros_P2/";
-    for (int i = 0; i < (int)libros.size(); i++) {
-        rutaLibros.push_back(ruta + libros[i]);
+    std::string path = "Libros_P2/";
+    for (int i = 0; i < (int)books.size(); i++) {
+        bookPath.push_back(path + books[i]);
     }
 }
 
@@ -85,135 +85,135 @@ void crearRuta()
         std::vector<std::string> vectorParcial;
         //Creamos el objeto buscador con sus correspondientes valores
         Buscador buscador(palabraBuscada, i, limiteInferior, limiteSuperior);
-        buscadorHilos.push_back(buscador);
+        threadFinder.push_back(buscador);
 
         for (int j = limiteInferior - 1; j < limiteSuperior; j++)
         {
             vectorParcial.push_back(lineas[j]);
         }
         //Cada hilo realizara el metodo de buscarPalabra
-        vhilos.push_back(std::thread(buscarPalabra, i, vectorParcial));
+        vhilos.push_back(std::thread(findWord, i, vectorParcial));
     }
 
     std::for_each(vhilos.begin(), vhilos.end(), std::mem_fn(&std::thread::join));
 }
 */
 
-void crearClientes (int numeroHilos,int numeroLineas,std::string palabraBuscada,std::vector<std::string> lineas){
-    std::vector<std::thread> vClientes;
+void creatClient (int nThread,int nLines,std::string searchWord,std::vector<std::string> vLines){
+    std::vector<std::thread> vClients;
 
     for(int i=0; i<NUMEROCLIENTES; i++){
         srand(time(NULL));
         int num= rand()%(3-1);
-        Cliente cliente(i, num);
+        Cliente client(i, num);
 
         if(num==2){
-            peticionClienteGratuito.push(cliente);
+            clientRequestFree.push(client);
         }
 
     }
 }
 
 /*Leemos el fichero para sacar las lineas*/
-std::vector<std::string> leerFichero(std::string rutaFichero)
+std::vector<std::string> readFile(std::string bookPath)
 {
-    std::ifstream archivo_entrada(rutaFichero);
-    std::string linea;
-    std::vector<std::string> lineas;
+    std::ifstream inputFile(bookPath);
+    std::string line;
+    std::vector<std::string> vLines;
 
-    while (getline(archivo_entrada, linea))
+    while (getline(inputFile, line))
     {
-        lineas.push_back(linea);
+        vLines.push_back(line);
     }
-    return lineas;
+    return vLines;
 }
 /*Buscamos la palabra deseada en el libro*/
-void buscarPalabra(int iteracion, std::vector<std::string> vector)
+void findWord(int iteration, std::vector<std::string> vector)
 {
-    std::vector<std::string> palabras;
-    std::queue<Resultado_Busqueda> colaResultados;
-    Resultado_Busqueda resultados;
-    int lineaR;
+    std::vector<std::string> words;
+    std::queue<Resultado_Busqueda> queueResults;
+    Resultado_Busqueda results;
+    int resultLine;
 
     for (int i = 0; i < vector.size(); i++)
     {
 
-        std::string linea = eliminarSimbolos(vector[i]);
+        std::string line = eraseSymbols(vector[i]);
         /*Transformamos todas las palabras de la linea en minusculas*/
-        std::transform(linea.begin(), linea.end(), linea.begin(), ::tolower);
+        std::transform(line.begin(), line.end(), line.begin(), ::tolower);
         /*Troceamos la linea en las palabras*/
-        std::istringstream trocearLinea(linea);
-        std::copy(std::istream_iterator<std::string>(trocearLinea), std::istream_iterator<std::string>(), back_inserter(palabras));
+        std::istringstream trocearLinea(line);
+        std::copy(std::istream_iterator<std::string>(trocearLinea), std::istream_iterator<std::string>(), back_inserter(words));
 
         /*Recorremos las palabras de la linea*/
-        for (int j = 0; j < palabras.size(); j++)
+        for (int j = 0; j < words.size(); j++)
         {
             /*Si la palabra que estamos mirando es igual a la que buscamos*/
-            if (palabras[j].compare(buscadorHilos[iteracion].getPalabraBuscada()) == 0)
+            if (words[j].compare(threadFinder[iteration].getPalabraBuscada()) == 0)
             {
-                lineaR = buscadorHilos[iteracion].getLineaInicio();
+                resultLine = threadFinder[iteration].getLineaInicio();
                 // std::cout<<"Palabra encontrada en linea "<<i+1+lineaR<<std::endl;
-                resultados.setLineaResultado(i + lineaR);
+                results.setLineaResultado(i + resultLine);
                 /*Si es la primera palabra de la linea*/
                 if (j == 0)
-                    resultados.setPalabraAnterior("---");
+                    results.setPalabraAnterior("---");
                 else
-                    resultados.setPalabraAnterior(palabras[j - 1]);
+                    results.setPalabraAnterior(words[j - 1]);
                 /*Si es la ultima palabra de la linea*/
-                if (j == palabras.size() - 1)
-                    resultados.setPalabraPosterior("---");
+                if (j == words.size() - 1)
+                    results.setPalabraPosterior("---");
                 else
-                    resultados.setPalabraPosterior(palabras[j + 1]);
+                    results.setPalabraPosterior(words[j + 1]);
 
                 /*Metemos los resultados en la cola resultados*/
-                colaResultados.push(resultados);
+                queueResults.push(results);
             }
         }
-        palabras.clear();
+        words.clear();
     }
 
-    std::lock_guard<std::mutex> lockGuard_(semaforo_);
-    buscadorHilos[iteracion].setColaResultados(colaResultados);
+    std::lock_guard<std::mutex> lockGuard_(mutex);
+    threadFinder[iteration].setColaResultados(queueResults);
 }
 
 /*Eliminamos cualquier simbolo que pueda aparecer en el libro que no sea letra*/
-std::string eliminarSimbolos(std::string linea)
+std::string eraseSymbols(std::string line)
 {
-    for (int i = 0, size = linea.size(); i < size; i++)
+    for (int i = 0, size = line.size(); i < size; i++)
     {
         /*Si es un caracter, lo eliminamos de la linea*/
-        if (ispunct(linea[i]))
+        if (ispunct(line[i]))
         {
-            linea.erase(i--, 1);
-            size = linea.size();
+            line.erase(i--, 1);
+            size = line.size();
         }
     }
-    return linea;
+    return line;
 }
 /*Imprimimos los resultados*/
-void imprimir()
+void printResults()
 {
-    int contador=0;
+    int counter=0;
 
-    for (int i = 0; i < buscadorHilos.size(); i++)
+    for (int i = 0; i < threadFinder.size(); i++)
     {
-        std::queue<Resultado_Busqueda> cola = buscadorHilos[i].getColaResultados();
+        std::queue<Resultado_Busqueda> queue = threadFinder[i].getColaResultados();
 
-        while (!cola.empty())
+        while (!queue.empty())
         {
-            std::cout << AZUL << "[Hilo: " << buscadorHilos[i].getId();
-            std::cout << ROJO << " Inicio: " << buscadorHilos[i].getLineaInicio();
-            std::cout << AMARILLO << " - final: " << buscadorHilos[i].getLineaFinal() << "]";
-            std::cout << AZUL << " :: linea " << cola.front().getLineaResultado() << " ";
-            std::cout << VERDE << "... " << cola.front().getPalabraAnterior() << " ";
-            std::cout << ROJO << buscadorHilos[i].getPalabraBuscada() << " ";
-            std::cout << AZUL << cola.front().getPalabraPosterior() << " ..." << std::endl;
+            std::cout << AZUL << "[Hilo: " << threadFinder[i].getId();
+            std::cout << ROJO << " Inicio: " << threadFinder[i].getLineaInicio();
+            std::cout << AMARILLO << " - final: " << threadFinder[i].getLineaFinal() << "]";
+            std::cout << AZUL << " :: line " << queue.front().getLineaResultado() << " ";
+            std::cout << VERDE << "... " << queue.front().getPalabraAnterior() << " ";
+            std::cout << ROJO << threadFinder[i].getPalabraBuscada() << " ";
+            std::cout << AZUL << queue.front().getPalabraPosterior() << " ..." << std::endl;
 
-            contador++;
-            cola.pop();
+            counter++;
+            queue.pop();
         }
     }
-    std::cout<<RESET<<"\nLa palabra "<<ROJO<<buscadorHilos[0].getPalabraBuscada()<<RESET<<" aparece " <<ROSITA<< contador <<RESET<< " veces\n" <<" "<<std::endl;
+    std::cout<<RESET<<"\nLa palabra "<<ROJO<<threadFinder[0].getPalabraBuscada()<<RESET<<" aparece " <<ROSITA<< counter <<RESET<< " veces\n" <<" "<<std::endl;
     std::cout << RESET << "Fin de " << AZUL << "SS" <<ROJO<< "O"<< AMARILLO <<"O"<<AZUL<<"II"<<VERDE<< "GL"<<ROJO<< "E"<<std::endl;
 
 }
