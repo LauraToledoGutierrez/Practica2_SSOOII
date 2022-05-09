@@ -103,15 +103,39 @@ void creatClient (int nThread,int nLines,std::string searchWord,std::vector<std:
     std::vector<std::thread> vClients;
 
     for(int i=0; i<NUMEROCLIENTES; i++){
-        srand(time(NULL));
-        int num= rand()%(3-1);
-        Client client(i, num);
 
-        if(num==2){
+        srand(time(NULL));
+        int typeClient= rand()%(3-1);
+        int book = rand() % dictionary.size();
+        //El libro de cada cliente no se si lo tenemos que meter en la clase cliente, que supongo, es lo que mas sentido tiene
+        Client client(i, typeClient);
+
+        if(typeClient==2){ //FREE 
             clientRequestFree.push(client);
+        }
+        else if(typeClient==0){ //PREMIUM
+            
+        }
+        else{ //PREMIUM WITH BALANCE
+
         }
 
     }
+}
+
+void launchThreads(){
+    int nThreads = 0;
+    std::vector<std::thread> vThread;
+    for(int i=0; i<nThreads;i+++){
+        if(i==0){
+            vThread.push_back(std::thread(systemPay));
+        }
+    }
+
+}
+
+void systemPay(){
+
 }
 
 /*Leemos el fichero para sacar las lineas*/
