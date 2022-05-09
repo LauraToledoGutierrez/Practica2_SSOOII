@@ -2,6 +2,7 @@
 
 /*Includes*/
 #include "definitions.h"
+#include "thread"
 #include "finder.h"
 #include "colors.h"
 #include "request.h"
@@ -130,11 +131,22 @@ void launchThreads(){
         if(i==0){
             vThread.push_back(std::thread(systemPay));
         }
+        else if(i==1){
+            v_hilos.push_back(std::thread(findWord));
+        }
+        else{
+            //v_hilos.push_back(std::thread(nose));
+            //¿?Sleep para hacer hilos cada x tiempo????
+            std::this_thread::sleep_for(std::chrono::milliseconds(200));
+        }
     }
 
 }
 
 void systemPay(){
+    
+
+    
 
 }
 
