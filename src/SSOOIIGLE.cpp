@@ -2,17 +2,17 @@
 
 /*Includes*/
 #include "definitions.h"
-#include "buscador.h"
-#include "colores.h"
-#include "peticion.h"
-#include "cliente.h"
+#include "finder.h"
+#include "colors.h"
+#include "request.h"
+#include "client.h"
 #define NUMEROCLIENTES 10
 
 /*Variables globales*/
-std::vector<Buscador> threadFinder;
-std::queue<Resultado_Busqueda> queueResults;
-std::queue<Peticion> clientRequestFree;
-std::queue<Peticion> clientRequestPremium;
+std::vector<Finder> threadFinder;
+std::queue<Search_Result> queueResults;
+std::queue<Request> clientRequestFree;
+std::queue<Request> clientRequestPremium;
 std::mutex mutex;
 std::vector<std::string> bookPath;
 
@@ -37,10 +37,10 @@ int main(int argc, char *argv[])
     /*Controla si se introducen los argumentos correctos*/
     if (argc != 4)
     {
-        std::cout << ROJO << "Numero de argumentos incorrecto! <nombre_fichero> <palabra> <numero_hilos>" << std::endl;
+        std::cout << RED << "Numero de argumentos incorrecto! <nombre_fichero> <palabra> <numero_hilos>" << std::endl;
         exit(1);
     }
-    std::cout << RESET << "\nBienvenido a " << AZUL << "SS" <<ROJO<< "O"<< AMARILLO <<"O"<<AZUL<<"II"<<VERDE<< "GL"<<ROJO<< "E\n"<<std::endl;
+    std::cout << RESET << "\nBienvenido a " << BLUE << "SS" <<RED<< "O"<< YELLOW <<"O"<<BLUE<<"II"<<GREEN<< "GL"<<RED<< "E\n"<<std::endl;
 
     /*Guardamos los argumentos en variables*/
     std::string bookPath(argv[1]);
@@ -105,7 +105,7 @@ void creatClient (int nThread,int nLines,std::string searchWord,std::vector<std:
     for(int i=0; i<NUMEROCLIENTES; i++){
         srand(time(NULL));
         int num= rand()%(3-1);
-        Cliente client(i, num);
+        Client client(i, num);
 
         if(num==2){
             clientRequestFree.push(client);
@@ -131,8 +131,8 @@ std::vector<std::string> readFile(std::string bookPath)
 void findWord(int iteration, std::vector<std::string> vector)
 {
     std::vector<std::string> words;
-    std::queue<Resultado_Busqueda> queueResults;
-    Resultado_Busqueda results;
+    std::queue<Search_Result> queueResults;
+    Search_Result results;
     int resultLine;
 
     for (int i = 0; i < vector.size(); i++)
@@ -149,21 +149,21 @@ void findWord(int iteration, std::vector<std::string> vector)
         for (int j = 0; j < words.size(); j++)
         {
             /*Si la palabra que estamos mirando es igual a la que buscamos*/
-            if (words[j].compare(threadFinder[iteration].getPalabraBuscada()) == 0)
+            if (words[j].compare(threadFinder[iteration].getSearchedWord()) == 0)
             {
-                resultLine = threadFinder[iteration].getLineaInicio();
+                resultLine = threadFinder[iteration].getInitialLine();
                 // std::cout<<"Palabra encontrada en linea "<<i+1+lineaR<<std::endl;
-                results.setLineaResultado(i + resultLine);
+                results.setresultLine(i + resultLine);
                 /*Si es la primera palabra de la linea*/
                 if (j == 0)
-                    results.setPalabraAnterior("---");
+                    results.setPreviousWord("---");
                 else
-                    results.setPalabraAnterior(words[j - 1]);
+                    results.setPreviousWord(words[j - 1]);
                 /*Si es la ultima palabra de la linea*/
                 if (j == words.size() - 1)
-                    results.setPalabraPosterior("---");
+                    results.setNextWord("---");
                 else
-                    results.setPalabraPosterior(words[j + 1]);
+                    results.setNextWord(words[j + 1]);
 
                 /*Metemos los resultados en la cola resultados*/
                 queueResults.push(results);
@@ -173,7 +173,7 @@ void findWord(int iteration, std::vector<std::string> vector)
     }
 
     std::lock_guard<std::mutex> lockGuard_(mutex);
-    threadFinder[iteration].setColaResultados(queueResults);
+    threadFinder[iteration].setQueueResults(queueResults);
 }
 
 /*Eliminamos cualquier simbolo que pueda aparecer en el libro que no sea letra*/
@@ -197,23 +197,23 @@ void printResults()
 
     for (int i = 0; i < threadFinder.size(); i++)
     {
-        std::queue<Resultado_Busqueda> queue = threadFinder[i].getColaResultados();
+        std::queue<Search_Result> queue = threadFinder[i].getQueueResults();
 
         while (!queue.empty())
         {
-            std::cout << AZUL << "[Hilo: " << threadFinder[i].getId();
-            std::cout << ROJO << " Inicio: " << threadFinder[i].getLineaInicio();
-            std::cout << AMARILLO << " - final: " << threadFinder[i].getLineaFinal() << "]";
-            std::cout << AZUL << " :: line " << queue.front().getLineaResultado() << " ";
-            std::cout << VERDE << "... " << queue.front().getPalabraAnterior() << " ";
-            std::cout << ROJO << threadFinder[i].getPalabraBuscada() << " ";
-            std::cout << AZUL << queue.front().getPalabraPosterior() << " ..." << std::endl;
+            std::cout << BLUE << "[Hilo: " << threadFinder[i].getId();
+            std::cout << RED << " Inicio: " << threadFinder[i].getInitialLine();
+            std::cout << YELLOW << " - final: " << threadFinder[i].getFinalLine() << "]";
+            std::cout << BLUE << " :: line " << queue.front().getresultLine() << " ";
+            std::cout << GREEN << "... " << queue.front().getPreviousWord() << " ";
+            std::cout << RED << threadFinder[i].getSearchedWord() << " ";
+            std::cout << BLUE << queue.front().getNextWord() << " ..." << std::endl;
 
             counter++;
             queue.pop();
         }
     }
-    std::cout<<RESET<<"\nLa palabra "<<ROJO<<threadFinder[0].getPalabraBuscada()<<RESET<<" aparece " <<ROSITA<< counter <<RESET<< " veces\n" <<" "<<std::endl;
-    std::cout << RESET << "Fin de " << AZUL << "SS" <<ROJO<< "O"<< AMARILLO <<"O"<<AZUL<<"II"<<VERDE<< "GL"<<ROJO<< "E"<<std::endl;
+    std::cout<<RESET<<"\nLa palabra "<<RED<<threadFinder[0].getSearchedWord()<<RESET<<" aparece " <<PINK<< counter <<RESET<< " veces\n" <<" "<<std::endl;
+    std::cout << RESET << "Fin de " << BLUE << "SS" <<RED<< "O"<< YELLOW <<"O"<<BLUE<<"II"<<GREEN<< "GL"<<RED<< "E"<<std::endl;
 
 }
