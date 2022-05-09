@@ -19,11 +19,11 @@ std::vector<std::string> bookPath;
 
 std::vector<std::string> readFile(std::string bookPath);
 int readLines();
-void creatClient(int nLines, int nThread, std::string searchWord, std::vector<std::string> vLines);
+void createClient(int nLines, int nThread, std::string searchWord, std::vector<std::string> vLines);
 void findWord(int iteration, std::vector<std::string> vector);
 std::string eraseSymbols(std::string line);
 void printResults();
-void creatPath();
+void createPath();
 
 std::vector<std::string> books = {"17-LEYES-DEL-TRABJO-EN-EQUIPO.txt", "21-LEYES-DEL-LIDERAZGO.txt", "25-MANERAS-DE-GANARSE-A-LA-GENTE.txt",
                         "ACTITUD-DE-VENDEDOR.txt", "El-oro-y-la-ceniza.txt", "La-última-sirena.txt", "prueba.txt", 
@@ -48,14 +48,16 @@ int main(int argc, char *argv[])
     std::string searchWord = argv[2];
     int nThread = atoi(argv[3]);
 
+    //NOTA: RECORRER EL VECTOR DE LIBROS Y LLAMAR X VECES AL METODO -> CREAR METODO APARTE
+
     std::vector<std::string> vLines = readFile(bookPath);
     int nLines = vLines.size();
 
-    creatClient(nThread, nLines, searchWord, vLines);
+    createClient(nThread, nLines, searchWord, vLines);
     printResults();
 }
 
-void creatPath()
+void createPath()
 {
     std::string path = "Libros_P2/";
     for (int i = 0; i < (int)books.size(); i++) {
@@ -100,7 +102,7 @@ void creatPath()
 }
 */
 
-void creatClient (int nThread,int nLines,std::string searchWord,std::vector<std::string> vLines){
+void createClient (int nThread,int nLines,std::string searchWord,std::vector<std::string> vLines){
     std::vector<std::thread> vClients;
 
     for(int i=0; i<NUMEROCLIENTES; i++){
@@ -144,7 +146,8 @@ void launchThreads(){
 }
 
 void systemPay(){
-    
+    //Variable condicion cv.wait{return !queue.empty}
+    //Semaforo para sincronizacion y pasarle el id del cliente
 
     
 

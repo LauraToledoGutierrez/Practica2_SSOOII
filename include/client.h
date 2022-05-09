@@ -1,6 +1,7 @@
 #include <iostream>
 #include <bits/stdc++.h>
 #include <queue>
+#include "request.h"
 
 class Client{
     int idClient;
@@ -8,6 +9,7 @@ class Client{
                         //1: Premium with balance
                         //2: Free
     int balance;
+    Request request;
 
     Client(){}
     Client(int idClient, int typeClient): idClient(idClient), typeClient(typeClient), balance(balance){}
@@ -48,5 +50,11 @@ class Client{
         balance = newSaldo;
     }
 
+    Request getRequest(){
+        return request;
+    }
+    void setRequest(Request request){
+        this->request = request;
+    }
 
 };

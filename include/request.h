@@ -2,7 +2,7 @@
 
 class Request{
     private:
-        int book;
+        //int book;
         int idRequest;
         std::string wordToSearch;
         bool endRequest;
@@ -17,7 +17,7 @@ class Request{
         return idRequest;
     }
 
-    int getBook()
+    /*int getBook()
     {
         return book;
     }
@@ -25,7 +25,7 @@ class Request{
     void nextBook()
     {
         book++;
-    }
+    }*/
 
     std::string getwordToSearch()
     {
