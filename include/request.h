@@ -9,6 +9,9 @@ class Request{
     
     public:
          Request();
+    
+    std::promise<std::queue<Search_Result>> prom;
+    std::future<std::queue<Search_Result>> fut= prom.get_future();
 
     Request(int idRequest, std::string wordToSearch): idRequest(idRequest), wordToSearch(wordToSearch){}
 

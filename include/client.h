@@ -14,6 +14,13 @@ class Client
     Request request;
 
 public:
+    /***************************************
+     * Description: When calling a client thread, this will be the execution of that theads 
+     *      (Enqueueing requests, waiting fo the results of the search and printing the results)
+     * Parameters: None
+     * Version: 1.0
+     * Date: 10/04/2022
+     * *************************************/
     void operator()() const
     {
         
@@ -22,16 +29,19 @@ public:
         int wordToSearch= rand()%dictionary.size();
         Request request(g_id_request++, dictionary[wordToSearch]);
         if(typeClient==2){
-            std::unique_lock<std::mutex> uniLockQRequests(mutexQRequests); //* Exclusion Mutua para encolar peticiones
-            clientRequestFree.push(request);
+            std::unique_lock<std::mutex> uniLockQRequests(mutexQRequests); //* Mutual exclusion for enqueueing Requests
+            clientRequestFree.push(std::move(request));
+            cvClient.notify_one(); //*Notify Finder thread so that they search into the queue
+            std::queue<Search_Result> results= clientRequestFree.front().fut.get();
             uniLockQRequests.unlock();
 
         }
         else{
             std::unique_lock<std::mutex> uniLockQRequests(mutexQRequests);
             clientRequestPremium.push(request);
+            cvClient.notify_one();
+            std::queue<Search_Result> results= clientRequestPremium.front().fut.get();
             uniLockQRequests.unlock();
-
         }
 
 
@@ -81,14 +91,5 @@ public:
     void setSaldo(int newSaldo)
     {
         balance = newSaldo;
-    }
-
-    Request getRequest()
-    {
-        return request;
-    }
-    void setRequest(Request request)
-    {
-        this->request = request;
     }
 };

@@ -21,6 +21,7 @@ std::vector<std::string> bookPath;
 
 std::queue<Client> q_clients_pay;
 std::queue<Client> q_client_find;
+std::condition_variable cvClient;
 std::condition_variable cvPay;
 std::condition_variable cvFinder;
 
@@ -83,7 +84,8 @@ void createPath()
  * Description: Divides a source into several parts so that each thread can look into a part of the source file
  * Parameters: numberLines(number of total lines of the source file), wordToSearch(word that we are searching in the files), partialLines(all the lines a thread must look into)
  * Version: 1.0
- */
+ * Date: 10/04/2022
+ ***********************************/
 
 void createFinderThreads(int numberLines, std::string wordToSearch,std::vector<std::string> partialLines)
 {
