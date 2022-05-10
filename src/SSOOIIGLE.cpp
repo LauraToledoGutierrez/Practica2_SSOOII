@@ -2,7 +2,6 @@
 
 /*Includes*/
 #include "definitions.h"
-#include "thread"
 #include "finder.h"
 #include "colors.h"
 #include "request.h"
@@ -18,6 +17,12 @@ std::queue<Request> clientRequestPremium;
 std::mutex mutex;
 std::vector<std::string> bookPath;
 
+std::queue<Cliente> q_clients_pay;
+std::queue<Client> q_client_find;
+std::condition_variable cvPay;
+std::condition_variable cvFinder;
+
+
 std::vector<std::string> readFile(std::string bookPath);
 int readLines();
 void createClient(int nLines, int nThread, std::string searchWord, std::vector<std::string> vLines);
@@ -25,6 +30,8 @@ void findWord(int iteration, std::vector<std::string> vector);
 std::string eraseSymbols(std::string line);
 void printResults();
 void createPath();
+void systemPay();
+void finder();
 
 std::vector<std::string> books = {"17-LEYES-DEL-TRABJO-EN-EQUIPO.txt", "21-LEYES-DEL-LIDERAZGO.txt", "25-MANERAS-DE-GANARSE-A-LA-GENTE.txt",
                         "ACTITUD-DE-VENDEDOR.txt", "El-oro-y-la-ceniza.txt", "La-última-sirena.txt", "prueba.txt", 
@@ -51,18 +58,20 @@ int main(int argc, char *argv[])
 
     //NOTA: RECORRER EL VECTOR DE LIBROS Y LLAMAR X VECES AL METODO -> CREAR METODO APARTE
 
-    std::vector<std::string> vLines = readFile(bookPath);
-    int nLines = vLines.size();
+    //std::vector<std::string> vLines = readFile(bookPath);
+    //int nLines = vLines.size();
 
-    createClient(nThread, nLines, searchWord, vLines);
+    //createClient(nThread, nLines, searchWord, vLines);
     printResults();
 }
 
+/* Creamos la ruta de los libros y llamamos al metodo readFile para dividir el fichero en lineas */
 void createPath()
 {
     std::string path = "Libros_P2/";
     for (int i = 0; i < (int)books.size(); i++) {
         bookPath.push_back(path + books[i]);
+        std::vector<std::string> vLines = readFile(bookPath[i]);
     }
 }
 
@@ -151,13 +160,29 @@ void launchThreads(){
     }
 
 }
-
+/* La idea del metodo es crear un bucle infinito que solo se ejecute cuando la cola de clientes pendientes de pago tenga algun elemento, esto
+lo controlamos con la cv. Cuando se ejecuta creamos un cliente con los datos del cliente de la cola y le añadimos el nuevo saldo, a continuacion
+metemos el cliente de nuevo en una nueva cola que pasaremos al metodo busqueda. Notificaremos de que ya se ha recargado al metodo busqueda haciendo
+uso de notify_all()*/
 void systemPay(){
     //Variable condicion cv.wait{return !queue.empty}
     //Semaforo para sincronizacion y pasarle el id del cliente
 
-    
+    int newBalance = 20;
+    std::mutex mutex_pay;
+    std::unique_lock<std::mutex> lk(mutex_pay);
 
+    while(1){
+        cvPay.wait(lk, []{ return !q_clients_pay.empty();});
+
+        Client client = q_clients_pay.front();
+        q_clients_pay.pop();
+        
+        client.setSaldo(newBalance);
+        q_client_find.push(client);
+
+        cvFinder.notify_all();
+    }
 }
 
 /*Leemos el fichero para sacar las partialLines*/
@@ -220,6 +245,12 @@ void findWord(int iteration, std::vector<std::string> vector)
 
     std::lock_guard<std::mutex> lockGuard_(mutex);
     threadFinder[iteration].setQueueResults(queueResults);
+}
+
+/* La idea de este metodo es que va a ser ejecutado por los buscadores. En este metodo controlamos las peticiones de busqueda y vemos el saldo que 
+le queda a cada cliente y si no tiene saldo llamamos al sistema de pago */
+void finder(){
+    //¿Cola de peticiones? -> si no esta vacia -> buscamos la palabra -> si no tiene saldo -> llamar al systemPay
 }
 
 /*Eliminamos cualquier simbolo que pueda aparecer en el libro que no sea letra*/
