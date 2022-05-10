@@ -2,6 +2,7 @@
 #include <bits/stdc++.h>
 #include <queue>
 #include "request.h"
+#include "definitions.h"
 
 class Client
 {
@@ -13,6 +14,29 @@ class Client
     Request request;
 
 public:
+    void operator()() const
+    {
+        
+        std::vector<std::string> dictionary = {"casa", "telefono", "final"};
+        srand(time(NULL));
+        int wordToSearch= rand()%dictionary.size();
+        Request request(g_id_request++, dictionary[wordToSearch]);
+        if(typeClient==2){
+            std::unique_lock<std::mutex> uniLockQRequests(mutexQRequests); //* Exclusion Mutua para encolar peticiones
+            clientRequestFree.push(request);
+            uniLockQRequests.unlock();
+
+        }
+        else{
+            std::unique_lock<std::mutex> uniLockQRequests(mutexQRequests);
+            clientRequestPremium.push(request);
+            uniLockQRequests.unlock();
+
+        }
+
+
+    }
+
     Client() {}
     Client(int idClient, int typeClient) : idClient(idClient), typeClient(typeClient), balance(balance) {}
 

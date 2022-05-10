@@ -15,3 +15,4 @@
 #include <iterator>
 #include <sstream>
 #include <mutex>
+#include <atomic>

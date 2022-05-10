@@ -10,7 +10,7 @@ class Request{
     public:
          Request();
 
-    Request(int, std::string);
+    Request(int idRequest, std::string wordToSearch): idRequest(idRequest), wordToSearch(wordToSearch){}
 
     int getIdRequest()
     {

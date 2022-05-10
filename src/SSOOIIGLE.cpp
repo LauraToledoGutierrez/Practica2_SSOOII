@@ -14,13 +14,17 @@ std::vector<Finder> threadFinder;
 std::queue<Search_Result> queueResults;
 std::queue<Request> clientRequestFree;
 std::queue<Request> clientRequestPremium;
+std::mutex mutexQRequests;
+std::unique_lock<std::mutex> uniLockQRequests(mutexQRequests);
 std::mutex mutex;
 std::vector<std::string> bookPath;
 
-std::queue<Cliente> q_clients_pay;
+std::queue<Client> q_clients_pay;
 std::queue<Client> q_client_find;
 std::condition_variable cvPay;
 std::condition_variable cvFinder;
+
+std::atomic<int> g_id_request(0);
 
 
 std::vector<std::string> readFile(std::string bookPath);
@@ -37,7 +41,6 @@ std::vector<std::string> books = {"17-LEYES-DEL-TRABJO-EN-EQUIPO.txt", "21-LEYES
                         "ACTITUD-DE-VENDEDOR.txt", "El-oro-y-la-ceniza.txt", "La-última-sirena.txt", "prueba.txt", 
                         "SEAMOS-PERSONAS-DE-INFLUENCIA.txt", "VIVE-TU-SUEÑO.txt"};
 
-std::vector<std::string> dictionary = {"casa", "telefono", "final"};
 
 
 int main(int argc, char *argv[])
