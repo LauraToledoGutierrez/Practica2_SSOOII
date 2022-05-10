@@ -8,6 +8,7 @@
 #include "request.h"
 #include "client.h"
 #define NUMEROCLIENTES 10
+#define NUMBERTHREADS 2
 
 /*Variables globales*/
 std::vector<Finder> threadFinder;
@@ -65,34 +66,40 @@ void createPath()
     }
 }
 
-// DEPRECATED 
-/*void crearHilos(int numeroHilos,int numeroLineas,std::string palabraBuscada,std::vector<std::string> lineas)
+/***********************************
+ * Method: createFinderThreads
+ * Description: Divides a source into several parts so that each thread can look into a part of the source file
+ * Parameters: numberLines(number of total lines of the source file), wordToSearch(word that we are searching in the files), partialLines(all the lines a thread must look into)
+ * Version: 1.0
+ */
+
+void createFinderThreads(int numberLines, std::string wordToSearch,std::vector<std::string> partialLines)
 {
     std::vector<std::thread> vhilos;
-    for (int i = 0; i < numeroHilos; i++)
+    for (int i = 0; i < NUMBERTHREADS; i++)
     {
-        int limiteInferior, limiteSuperior;
+        int lowerLimit, upperLimit;
 
         //Si es el primer hilo
         if (i == 0)
-            limiteInferior = 1;
+            lowerLimit = 1;
         else
-            limiteInferior = ((numeroLineas / numeroHilos) * i + 1);
+            lowerLimit = ((numberLines / NUMBERTHREADS) * i + 1);
 
         //Si es el ultimo hilo
-        if (i == numeroHilos - 1)
-            limiteSuperior = numeroLineas;
+        if (i == NUMBERTHREADS - 1)
+            upperLimit = numberLines;
         else
-            limiteSuperior = (limiteInferior + (numeroLineas / numeroHilos) - 1);
+            upperLimit = (lowerLimit + (numberLines / NUMBERTHREADS) - 1);
 
         std::vector<std::string> vectorParcial;
-        //Creamos el objeto buscador con sus correspondientes valores
-        Buscador buscador(palabraBuscada, i, limiteInferior, limiteSuperior);
-        threadFinder.push_back(buscador);
+        //Creamos el objeto finder con sus correspondientes valores
+        Finder finder(wordToSearch, i, lowerLimit, upperLimit);
+        threadFinder.push_back(finder);
 
-        for (int j = limiteInferior - 1; j < limiteSuperior; j++)
+        for (int j = lowerLimit - 1; j < upperLimit; j++)
         {
-            vectorParcial.push_back(lineas[j]);
+            vectorParcial.push_back(partialLines[j]);
         }
         //Cada hilo realizara el metodo de buscarPalabra
         vhilos.push_back(std::thread(findWord, i, vectorParcial));
@@ -100,7 +107,7 @@ void createPath()
 
     std::for_each(vhilos.begin(), vhilos.end(), std::mem_fn(&std::thread::join));
 }
-*/
+
 
 void createClient (int nThread,int nLines,std::string searchWord,std::vector<std::string> vLines){
     std::vector<std::thread> vClients;
@@ -109,7 +116,7 @@ void createClient (int nThread,int nLines,std::string searchWord,std::vector<std
 
         srand(time(NULL));
         int typeClient= rand()%(3-1);
-        int book = rand() % dictionary.size();
+        int wordToSearch = rand() % dictionary.size(); //! Tiene que implementarlo el cliente
         //El libro de cada cliente no se si lo tenemos que meter en la clase cliente, que supongo, es lo que mas sentido tiene
         Client client(i, typeClient);
 
@@ -117,7 +124,7 @@ void createClient (int nThread,int nLines,std::string searchWord,std::vector<std
             clientRequestFree.push(client);
         }
         else if(typeClient==0){ //PREMIUM
-            
+            clientRequestPremium.push()
         }
         else{ //PREMIUM WITH BALANCE
 
@@ -153,7 +160,7 @@ void systemPay(){
 
 }
 
-/*Leemos el fichero para sacar las lineas*/
+/*Leemos el fichero para sacar las partialLines*/
 std::vector<std::string> readFile(std::string bookPath)
 {
     std::ifstream inputFile(bookPath);
