@@ -21,12 +21,13 @@ std::vector<std::string> bookPath;
 
 std::queue<Client> q_clients_pay;
 std::queue<Client> q_client_find;
+std::vector<std::thread> vThreadClient;
+
 std::condition_variable cvClient;
 std::condition_variable cvPay;
 std::condition_variable cvFinder;
 
 std::atomic<int> g_id_request(0);
-
 
 std::vector<std::string> readFile(std::string bookPath);
 int readLines();
@@ -37,9 +38,6 @@ void printResults();
 void createPath();
 void systemPay();
 void finder();
-
-
-
 
 int main(int argc, char *argv[])
 {
@@ -84,8 +82,7 @@ void createPath()
  * Date: 10/04/2022
  ***********************************/
 
-void createFinderThreads(int numberLines, std::string wordToSearch,std::vector<std::string> partialLines)
-{
+void createFinderThread(int numberLines, std::string wordToSearch, std::vector<std::string>partialLines){
     std::vector<std::thread> vhilos;
     for (int i = 0; i < NUMBERTHREADS; i++)
     {
@@ -130,12 +127,11 @@ void createClient (int nThread,int nLines,std::string searchWord,std::vector<std
         int wordToSearch = rand() % dictionary.size(); //! Tiene que implementarlo el cliente
         //El libro de cada cliente no se si lo tenemos que meter en la clase cliente, que supongo, es lo que mas sentido tiene
         Client client(i, typeClient);
-
         if(typeClient==2){ //FREE 
             clientRequestFree.push(client);
         }
         else if(typeClient==0){ //PREMIUM
-            clientRequestPremium.push()
+            //clientRequestPremium.push()
         }
         else{ //PREMIUM WITH BALANCE
 
@@ -145,28 +141,33 @@ void createClient (int nThread,int nLines,std::string searchWord,std::vector<std
 }
 
 void launchThreads(){
-    int nThreads = 0;
+    int nThreads = 5;
     std::vector<std::thread> vThread;
-    for(int i=0; i<nThreads;i++){
-        if(i==0){
-            vThread.push_back(std::thread(systemPay));
-        }
-        else if(i==1){
-            v_hilos.push_back(std::thread(findWord));
-        }
-        else{
-            //v_hilos.push_back(std::thread(nose));
-            //¿?Sleep para hacer hilos cada x tiempo????
-            std::this_thread::sleep_for(std::chrono::milliseconds(200));
-        }
-    }
 
+    std::cout <<"Se ha lanzado el sistema de pago" <<std::endl;
+    vThread.push_back(std::thread(systemPay));
+
+    for(int i=0; i<4;i++){
+        std::cout <<"Se ha lanzado el buscador" <<std::endl;
+        vThread.push_back(std::thread(findWord));
+    }
+    while(1){
+        Client c;
+        for(int j=0; j<20; j++){
+            std::cout <<"Se ha lanzado el cliente" <<std::endl;
+            vThreadClient.push_back(std::thread(c));
+        }
+        std::this_thread::sleep_for(std::chrono::milliseconds(200));
+    }     
 }
+    //std::for_each(vThread.begin(), vThread.end(), std::mem_fn(&std::thread::join));
+
+
 /* La idea del metodo es crear un bucle infinito que solo se ejecute cuando la cola de clientes pendientes de pago tenga algun elemento, esto
 lo controlamos con la cv. Cuando se ejecuta creamos un cliente con los datos del cliente de la cola y le añadimos el nuevo saldo, a continuacion
 metemos el cliente de nuevo en una nueva cola que pasaremos al metodo busqueda. Notificaremos de que ya se ha recargado al metodo busqueda haciendo
 uso de notify_all()*/
-void systemPay(){
+void systemPay(){ 
     //Variable condicion cv.wait{return !queue.empty}
     //Semaforo para sincronizacion y pasarle el id del cliente
 
@@ -179,7 +180,9 @@ void systemPay(){
 
         Client client = q_clients_pay.front();
         q_clients_pay.pop();
-        
+        std::cout <<"El cliente "<< client.getidCliente() << " esta en el sistema de pago." <<std::endl;
+        std::this_thread::sleep_for(std::chrono::milliseconds(500));
+        std::cout <<"El cliente "<< client.getidCliente() << " ya ha recargado su saldo." <<std::endl;
         client.setSaldo(newBalance);
         q_client_find.push(client);
 
@@ -212,7 +215,7 @@ void findWord(int iteration, std::vector<std::string> vector)
     {
 
         std::string line = eraseSymbols(vector[i]);
-        /*Transformamos todas las palabras de la linea en minusculas*/
+        /*Transformamos todas v_hilosas palabras de la linea en minusculas*/
         std::transform(line.begin(), line.end(), line.begin(), ::tolower);
         /*Troceamos la linea en las palabras*/
         std::istringstream trocearLinea(line);
