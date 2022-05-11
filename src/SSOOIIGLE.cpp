@@ -6,32 +6,35 @@
 #include "colors.h"
 #include "request.h"
 #include "client.h"
-#define NUMEROCLIENTES 10
+#define NUMBERCLIENTS 20
 #define NUMBERTHREADS 2
+#define NUMBERFINDER 4
 
 /*Variables globales*/
 std::vector<Finder> threadFinder;
+std::vector<std::thread> vThreadClient;
+std::vector<std::string> bookPath;
+
 std::queue<Search_Result> queueResults;
 std::queue<Request> clientRequestFree;
 std::queue<Request> clientRequestPremium;
+std::mutex mutex;
 std::mutex mutexQRequests;
 std::unique_lock<std::mutex> uniLockQRequests(mutexQRequests);
-std::mutex mutex;
-std::vector<std::string> bookPath;
 
 std::queue<Client> q_clients_pay;
 std::queue<Client> q_client_find;
-std::vector<std::thread> vThreadClient;
 
 std::condition_variable cvClient;
 std::condition_variable cvPay;
 std::condition_variable cvFinder;
 
 std::atomic<int> g_id_request(0);
+std::atomic<int> g_id_client(0);
 
 std::vector<std::string> readFile(std::string bookPath);
 int readLines();
-void createClient(int nLines, int nThread, std::string searchWord, std::vector<std::string> vLines);
+void createClient();
 void findWord(int iteration, std::vector<std::string> vector);
 std::string eraseSymbols(std::string line);
 void printResults();
@@ -64,15 +67,16 @@ int main(int argc, char *argv[])
     printResults();
 }
 
+//!DEPRECATED
 /* Creamos la ruta de los libros y llamamos al metodo readFile para dividir el fichero en lineas */
-void createPath()
+/* void createPath()
 {
     std::string path = "Libros_P2/";
     for (int i = 0; i < (int)books.size(); i++) {
         bookPath.push_back(path + books[i]);
         std::vector<std::string> vLines = readFile(bookPath[i]);
     }
-}
+}*/
 
 /***********************************
  * Method: createFinderThreads
@@ -117,50 +121,37 @@ void createFinderThread(int numberLines, std::string wordToSearch, std::vector<s
 }
 
 
-void createClient (int nThread,int nLines,std::string searchWord,std::vector<std::string> vLines){
+void createClient (){
     std::vector<std::thread> vClients;
 
-    for(int i=0; i<NUMEROCLIENTES; i++){
+    while(1){
+        for(int i=0; i<NUMBERCLIENTS; i++){
+            srand(time(NULL));
+            int typeClient= rand()%(3-1);
 
-        srand(time(NULL));
-        int typeClient= rand()%(3-1);
-        int wordToSearch = rand() % dictionary.size(); //! Tiene que implementarlo el cliente
-        //El libro de cada cliente no se si lo tenemos que meter en la clase cliente, que supongo, es lo que mas sentido tiene
-        Client client(i, typeClient);
-        if(typeClient==2){ //FREE 
-            clientRequestFree.push(client);
-        }
-        else if(typeClient==0){ //PREMIUM
-            //clientRequestPremium.push()
-        }
-        else{ //PREMIUM WITH BALANCE
+            //El libro de cada cliente no se si lo tenemos que meter en la clase cliente, que supongo, es lo que mas sentido tiene
+            g_id_client++;
+            Client client(g_id_client, typeClient);
+            vThreadClient.push_back(std::thread(client));
 
+            std::this_thread::sleep_for(std::chrono::milliseconds(200));
         }
-
     }
 }
 
 void launchThreads(){
-    int nThreads = 5;
     std::vector<std::thread> vThread;
 
     std::cout <<"Se ha lanzado el sistema de pago" <<std::endl;
     vThread.push_back(std::thread(systemPay));
 
-    for(int i=0; i<4;i++){
+    for(int i=0; i<NUMBERFINDER;i++){
+        Finder finder;
+        vThread.push_back(std::thread(finder));
         std::cout <<"Se ha lanzado el buscador" <<std::endl;
-        vThread.push_back(std::thread(findWord));
     }
-    while(1){
-        Client c;
-        for(int j=0; j<20; j++){
-            std::cout <<"Se ha lanzado el cliente" <<std::endl;
-            vThreadClient.push_back(std::thread(c));
-        }
-        std::this_thread::sleep_for(std::chrono::milliseconds(200));
-    }     
+    createClient();
 }
-    //std::for_each(vThread.begin(), vThread.end(), std::mem_fn(&std::thread::join));
 
 
 /* La idea del metodo es crear un bucle infinito que solo se ejecute cuando la cola de clientes pendientes de pago tenga algun elemento, esto

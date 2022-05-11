@@ -11,7 +11,9 @@ class Client
                     // 1: Premium with balance
                     // 2: Free
     int balance;
-    Request request;
+    
+    std::promise<std::queue<Search_Result>> prom;
+    std::future<std::queue<Search_Result>> fut= prom.get_future();
 
 public:
     /***************************************
@@ -27,12 +29,14 @@ public:
         std::vector<std::string> dictionary = {"casa", "telefono", "final"};
         srand(time(NULL));
         int wordToSearch= rand()%dictionary.size();
-        Request request(g_id_request++, dictionary[wordToSearch]);
+        int idRequest= g_id_request++;
+        Request request(idRequest, idClient, dictionary[wordToSearch]);
         if(typeClient==2){
             std::unique_lock<std::mutex> uniLockQRequests(mutexQRequests); //* Mutual exclusion for enqueueing Requests
-            clientRequestFree.push(std::move(request));
+            clientRequestFree.push(request);
             cvClient.notify_one(); //*Notify Finder thread so that they search into the queue
-            std::queue<Search_Result> results= clientRequestFree.front().fut.get();
+            std::queue<Search_Result> results= clientRequestFree.front().getIdClient().fut.get();
+            
             uniLockQRequests.unlock();
 
         }
