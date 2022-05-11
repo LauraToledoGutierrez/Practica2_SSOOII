@@ -11,9 +11,9 @@ class Client
                     // 1: Premium with balance
                     // 2: Free
     int balance;
+
+    Request request;
     
-    std::promise<std::queue<Search_Result>> prom;
-    std::future<std::queue<Search_Result>> fut= prom.get_future();
 
 public:
     /***************************************
@@ -36,7 +36,7 @@ public:
             clientRequestFree.push(request);
             cvClient.notify_one(); //*Notify Finder thread so that they search into the queue
             std::queue<Search_Result> results= clientRequestFree.front().getIdClient().fut.get();
-            
+
             uniLockQRequests.unlock();
 
         }
