@@ -31,11 +31,13 @@ std::condition_variable cvFinder;
 
 std::atomic<int> g_id_request(0);
 std::atomic<int> g_id_client(0);
-
+std::vector<std::string> books = {"./17-LEYES-DEL-TRABJO-EN-EQUIPO.txt", "./21-LEYES-DEL-LIDERAZGO.txt", "./25-MANERAS-DE-GANARSE-A-LA-GENTE.txt",
+                        "./ACTITUD-DE-VENDEDOR.txt", "./El-oro-y-la-ceniza.txt", "./La-última-sirena.txt", "./prueba.txt", 
+                        "./SEAMOS-PERSONAS-DE-INFLUENCIA.txt", "./VIVE-TU-SUEÑO.txt"};
 std::vector<std::string> readFile(std::string bookPath);
 int readLines();
 void createClient();
-void findWord(int iteration, std::vector<std::string> vector);
+void findWord(int nbook, int iteration, std::vector<std::string> vector);
 std::string eraseSymbols(std::string line);
 void printResults();
 void createPath();
@@ -114,7 +116,10 @@ void createFinderThread(int numberLines, std::string wordToSearch, std::vector<s
             vectorParcial.push_back(partialLines[j]);
         }
         //Cada hilo realizara el metodo de buscarPalabra
-        vhilos.push_back(std::thread(findWord, i, vectorParcial));
+          
+        for(int j=0; j<books.size(); i++){
+        vhilos.push_back(std::thread(findWord, j, i, vectorParcial));
+        }
     }
 
     std::for_each(vhilos.begin(), vhilos.end(), std::mem_fn(&std::thread::join));
@@ -195,15 +200,15 @@ std::vector<std::string> readFile(std::string bookPath)
     return vLines;
 }
 /*Buscamos la palabra deseada en el libro*/
-void findWord(int iteration, std::vector<std::string> vector)
+void findWord(int nbook, int iteration, std::vector<std::string> vector)
 {
     std::vector<std::string> words;
-    std::queue<Search_Result> queueResults;
+    std::vector<std::vector<Search_Results>> vResults;
     Search_Result results;
     int resultLine;
-
+    // for(int j=0; j<nbook;j++){
     for (int i = 0; i < vector.size(); i++)
-    {
+    {   
 
         std::string line = eraseSymbols(vector[i]);
         /*Transformamos todas v_hilosas palabras de la linea en minusculas*/
@@ -233,14 +238,16 @@ void findWord(int iteration, std::vector<std::string> vector)
                     results.setNextWord(words[j + 1]);
 
                 /*Metemos los resultados en la cola resultados*/
-                queueResults.push(results);
+                //queueResults.push(results);
+                vResults[nbook].push_back(results);
+
             }
         }
         words.clear();
     }
-
+// }
     std::lock_guard<std::mutex> lockGuard_(mutex);
-    threadFinder[iteration].setQueueResults(queueResults);
+    threadFinder[iteration].setvResults(vResults);
 }
 
 /* La idea de este metodo es que va a ser ejecutado por los buscadores. En este metodo controlamos las peticiones de busqueda y vemos el saldo que 
