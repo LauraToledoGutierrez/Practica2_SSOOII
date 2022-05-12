@@ -3,6 +3,14 @@
 #include <definitions.h>
 #include "request.h"
 
+extern std::vector<Request> clientRequestFree;
+extern std::vector<Request> requestsDone;
+extern std::vector<Request> clientRequestPremium;
+extern void printResults(Request req);
+extern std::vector<std::string> readFile(std::string bookPath);
+extern void findWord(int nbook, int iteration, std::vector<std::string> vector, int lowerLimit, int uppwerLimit, Request requestCurrent);
+extern void systemPay();
+
 
 class Client
 {
@@ -26,7 +34,7 @@ public:
      * Version: 1.0
      * Date: 10/04/2022
      * *************************************/
-    void operator()() 
+    void operator()() const
     {
         std::vector<std::string> dictionary = {"casa", "telefono", "final"};
         srand(time(NULL));

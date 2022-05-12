@@ -266,7 +266,6 @@ int compareClient(Request request)
             return i;
         }
     }
-    return;
 }
 
 /* La idea de este metodo es que va a ser ejecutado por los buscadores. En este metodo controlamos las peticiones de busqueda y vemos el saldo que

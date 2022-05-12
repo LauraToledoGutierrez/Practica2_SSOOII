@@ -32,7 +32,7 @@ public:
         std::for_each(vFinderThreads.begin(), vFinderThreads.end(), std::mem_fn(&std::thread::join));
     }
      ***********************************/
-    void operator()() const
+    void operator()() 
     {
         //! NEcesitamos exclusion mutua para sacar de la cola de peticiones
 
