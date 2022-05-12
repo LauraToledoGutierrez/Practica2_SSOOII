@@ -1,8 +1,6 @@
 #include "definitions.h"
-#include "colors.h"
-#include "finder.h"
 #include "request.h"
-#include "search_result.h"
+
 
 class Client
 {

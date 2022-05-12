@@ -1,8 +1,5 @@
 #include "definitions.h"
-#include "client.h"
-#include "colors.h"
 #include "request.h"
-#include "search_result.h"
 
 class Finder
 {
@@ -90,7 +87,7 @@ public:
 
                     // Creamos el objeto finder con sus correspondientes valores
                     Finder finder(req.getwordToSearch(), j, lowerLimit, upperLimit);
-                    threadFinder.push_back(finder);
+                    //threadFinder.push_back(finder);
 
                     // Cada hilo realizara el metodo de buscarPalabra
 
