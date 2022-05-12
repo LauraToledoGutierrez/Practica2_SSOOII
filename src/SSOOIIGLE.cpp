@@ -293,7 +293,7 @@ std::string eraseSymbols(std::string line)
 }
 /*Imprimimos los resultados*/
 //FIXME
-void printResults(std::vector<std::vector<Search_Result>> results)
+void printResults(std::vector<std::vector<Search_Result>> results, int idClient)
 {
     int counter=0;
 

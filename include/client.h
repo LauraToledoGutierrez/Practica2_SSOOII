@@ -37,22 +37,29 @@ public:
             std::unique_lock<std::mutex> uniLockQRequests(mutexQRequests); //* Mutual exclusion for enqueueing Requests
             clientRequestFree.push_back(request);
             cvClient.notify_one(); //*Notify Finder thread so that they search into the queue
+            uniLockQRequests.unlock();
 
             //std::queue<Search_Result> results= clientRequestFree.front().getIdClient().fut.get();
             for(int i=0; i<clientRequestFree.size(); i++){
                 if(requestsDone[i].getIdClient()==idClient){
-                    printResults(requestsDone[i].getSearchResults());
+                    printResults(requestsDone[i].getSearchResults(), idClient);
+                    requestsDone[i].
                 }
             }
-            uniLockQRequests.unlock();
 
         }
         else{
             std::unique_lock<std::mutex> uniLockQRequests(mutexQRequests);
             clientRequestPremium.push_back(request);
             cvClient.notify_one();
-            std::queue<Search_Result> results= clientRequestPremium.front().fut.get();
             uniLockQRequests.unlock();
+
+            for(int i=0; i<clientRequestFree.size(); i++){
+                if(requestsDone[i].getIdClient()==idClient){
+                    printResults(requestsDone[i].getSearchResults());
+                }
+            }
+            
         }
 
 
