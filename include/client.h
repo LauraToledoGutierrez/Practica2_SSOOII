@@ -32,7 +32,7 @@ public:
         srand(time(NULL));
         int wordToSearch= rand()%dictionary.size();
         int idRequest= g_id_request++;
-        Request request(idRequest, idClient, dictionary[wordToSearch]);
+        Request request(idRequest, idClient, dictionary[wordToSearch], typeClient);
         if(typeClient==2){
             std::unique_lock<std::mutex> uniLockQRequests(mutexQRequests); //* Mutual exclusion for enqueueing Requests
             clientRequestFree.push_back(request);
@@ -40,10 +40,9 @@ public:
             uniLockQRequests.unlock();
 
             //std::queue<Search_Result> results= clientRequestFree.front().getIdClient().fut.get();
-            for(int i=0; i<clientRequestFree.size(); i++){
+            for(int i=0; i<requestsDone.size(); i++){
                 if(requestsDone[i].getIdClient()==idClient){
-                    printResults(requestsDone[i].getSearchResults(), idClient);
-                    requestsDone[i].
+                    printResults(requestsDone[i]);
                 }
             }
 
@@ -54,9 +53,9 @@ public:
             cvClient.notify_one();
             uniLockQRequests.unlock();
 
-            for(int i=0; i<clientRequestFree.size(); i++){
+            for(int i=0; i<requestsDone.size(); i++){
                 if(requestsDone[i].getIdClient()==idClient){
-                    printResults(requestsDone[i].getSearchResults());
+                    printResults(requestsDone[i]);
                 }
             }
             
@@ -69,27 +68,27 @@ public:
     Client() {}
     Client(int idClient, int typeClient, int balance) : idClient(idClient), typeClient(typeClient), balance(balance) {}
 
-    int getidCliente()
+    int getidClient()
     {
         return idClient;
     }
 
-    void setidCliente(int idC)
+    void setidClient(int idC)
     {
         this->idClient = idC;
     }
 
-    int getTipo()
+    int getTypeClient()
     {
         return typeClient;
     }
 
-    int getSaldo()
+    int getBalance()
     {
         return balance;
     }
 
-    void setSaldo(int newSaldo)
+    void setBalance(int newSaldo)
     {
         balance = newSaldo;
     }

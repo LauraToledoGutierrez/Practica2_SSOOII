@@ -5,16 +5,18 @@ class Request{
         //int book;
         int idRequest;
         int idClient;
+        int typeClient;
         std::string wordToSearch;
+        int finishedThreads; //Amount of finder threads that have already finished
         bool endRequest;
-        std::vector<std::vector<Search_Result>> searchResults;
     
     public:
          Request();
     
+    std::vector<std::vector<Search_Result>> searchResults;
 
 
-    Request(int idRequest, int idClient, std::string wordToSearch): idRequest(idRequest), idClient(idClient), wordToSearch(wordToSearch){}
+    Request(int idRequest, int idClient, std::string wordToSearch, int typeClient): idRequest(idRequest), idClient(idClient), wordToSearch(wordToSearch), typeClient(typeClient){}
 
     int getIdRequest()
     {
@@ -54,5 +56,11 @@ class Request{
     }
     void setSearchResults(std::vector<std::vector<Search_Result>> Search_Result){
         this->searchResults=searchResults;
+    }
+    int getFinishedThreads(){
+        return finishedThreads;
+    }
+    void setFinishedThreads(int finishedThreads){
+        this->finishedThreads=finishedThreads;
     }
 };

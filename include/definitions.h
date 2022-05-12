@@ -16,3 +16,7 @@
 #include <sstream>
 #include <mutex>
 #include <atomic>
+
+#define NUMBERCLIENTS 20
+#define NUMBERTHREADS 3
+#define NUMBERFINDER 4
