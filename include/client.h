@@ -16,6 +16,9 @@ class Client
     
 
 public:
+
+    
+
     /***************************************
      * Description: When calling a client thread, this will be the execution of that theads 
      *      (Enqueueing requests, waiting fo the results of the search and printing the results)
@@ -25,7 +28,6 @@ public:
      * *************************************/
     void operator()() const
     {
-        
         std::vector<std::string> dictionary = {"casa", "telefono", "final"};
         srand(time(NULL));
         int wordToSearch= rand()%dictionary.size();
@@ -33,16 +35,21 @@ public:
         Request request(idRequest, idClient, dictionary[wordToSearch]);
         if(typeClient==2){
             std::unique_lock<std::mutex> uniLockQRequests(mutexQRequests); //* Mutual exclusion for enqueueing Requests
-            clientRequestFree.push(request);
+            clientRequestFree.push_back(request);
             cvClient.notify_one(); //*Notify Finder thread so that they search into the queue
-            std::queue<Search_Result> results= clientRequestFree.front().getIdClient().fut.get();
 
+            //std::queue<Search_Result> results= clientRequestFree.front().getIdClient().fut.get();
+            for(int i=0; i<clientRequestFree.size(); i++){
+                if(requestsDone[i].getIdClient()==idClient){
+                    printResults(requestsDone[i].getSearchResults());
+                }
+            }
             uniLockQRequests.unlock();
 
         }
         else{
             std::unique_lock<std::mutex> uniLockQRequests(mutexQRequests);
-            clientRequestPremium.push(request);
+            clientRequestPremium.push_back(request);
             cvClient.notify_one();
             std::queue<Search_Result> results= clientRequestPremium.front().fut.get();
             uniLockQRequests.unlock();
@@ -50,28 +57,11 @@ public:
 
 
     }
+    
 
     Client() {}
-    Client(int idClient, int typeClient) : idClient(idClient), typeClient(typeClient), balance(balance) {}
+    Client(int idClient, int typeClient, int balance) : idClient(idClient), typeClient(typeClient), balance(balance) {}
 
-    void asignBalance(int typeClient)
-    {
-
-        srand(time(NULL));
-
-        switch (typeClient)
-        {
-        case 0:
-            balance = INT_MAX;
-            break;
-        case 1:
-            balance = 1 + rand() % (100 - 1);
-            break;
-        case 2:
-            balance = 1 + rand() % (30 - 1);
-            break;
-        }
-    }
     int getidCliente()
     {
         return idClient;

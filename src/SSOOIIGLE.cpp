@@ -14,10 +14,11 @@
 std::vector<Finder> threadFinder;
 std::vector<std::thread> vThreadClient;
 std::vector<std::string> bookPath;
+std::vector<Request> requestsDone;
 
 std::queue<Search_Result> queueResults;
-std::queue<Request> clientRequestFree;
-std::queue<Request> clientRequestPremium;
+std::vector<Request> clientRequestFree;
+std::vector<Request> clientRequestPremium;
 std::mutex mutex;
 std::mutex mutexQRequests;
 std::unique_lock<std::mutex> uniLockQRequests(mutexQRequests);
@@ -31,9 +32,9 @@ std::condition_variable cvFinder;
 
 std::atomic<int> g_id_request(0);
 std::atomic<int> g_id_client(0);
-std::vector<std::string> books = {"./17-LEYES-DEL-TRABJO-EN-EQUIPO.txt", "./21-LEYES-DEL-LIDERAZGO.txt", "./25-MANERAS-DE-GANARSE-A-LA-GENTE.txt",
-                        "./ACTITUD-DE-VENDEDOR.txt", "./El-oro-y-la-ceniza.txt", "./La-última-sirena.txt", "./prueba.txt", 
-                        "./SEAMOS-PERSONAS-DE-INFLUENCIA.txt", "./VIVE-TU-SUEÑO.txt"};
+//std::vector<std::string> books = {"./17-LEYES-DEL-TRABJO-EN-EQUIPO.txt", "./21-LEYES-DEL-LIDERAZGO.txt", "./25-MANERAS-DE-GANARSE-A-LA-GENTE.txt",
+                        //"./ACTITUD-DE-VENDEDOR.txt", "./El-oro-y-la-ceniza.txt", "./La-última-sirena.txt", "./prueba.txt", 
+                        //"./SEAMOS-PERSONAS-DE-INFLUENCIA.txt", "./VIVE-TU-SUEÑO.txt"};
 std::vector<std::string> readFile(std::string bookPath);
 int readLines();
 void createClient();
@@ -133,16 +134,35 @@ void createClient (){
         for(int i=0; i<NUMBERCLIENTS; i++){
             srand(time(NULL));
             int typeClient= rand()%(3-1);
+            int balance= asignBalance(typeClient);
 
             //El libro de cada cliente no se si lo tenemos que meter en la clase cliente, que supongo, es lo que mas sentido tiene
             g_id_client++;
-            Client client(g_id_client, typeClient);
+            Client client(g_id_client, typeClient, balance);
             vThreadClient.push_back(std::thread(client));
 
             std::this_thread::sleep_for(std::chrono::milliseconds(200));
         }
     }
 }
+int asignBalance(int typeClient)
+    {
+        srand(time(NULL));
+        int balance_;
+        switch (typeClient)
+        {
+        case 0:
+            balance_ = INT_MAX;
+            break;
+        case 1:
+            balance_ = 1 + rand() % (100 - 1);
+            break;
+        case 2:
+            balance_ = 1 + rand() % (30 - 1);
+            break;
+        }
+        return balance_;
+    }
 
 void launchThreads(){
     std::vector<std::thread> vThread;
@@ -200,10 +220,10 @@ std::vector<std::string> readFile(std::string bookPath)
     return vLines;
 }
 /*Buscamos la palabra deseada en el libro*/
-void findWord(int nbook, int iteration, std::vector<std::string> vector)
+void findWord(int nbook, int iteration, std::vector<std::string> vector, Request requestCurrent)
 {
     std::vector<std::string> words;
-    std::vector<std::vector<Search_Results>> vResults;
+    std::vector<std::vector<Search_Result>> vResults;
     Search_Result results;
     int resultLine;
     // for(int j=0; j<nbook;j++){
@@ -240,7 +260,8 @@ void findWord(int nbook, int iteration, std::vector<std::string> vector)
                 /*Metemos los resultados en la cola resultados*/
                 //queueResults.push(results);
                 vResults[nbook].push_back(results);
-
+                requestCurrent.setSearchResults(vResults);
+                requestsDone.push_back(requestCurrent);
             }
         }
         words.clear();
@@ -271,7 +292,8 @@ std::string eraseSymbols(std::string line)
     return line;
 }
 /*Imprimimos los resultados*/
-void printResults()
+//FIXME
+void printResults(std::vector<std::vector<Search_Result>> results)
 {
     int counter=0;
 

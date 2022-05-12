@@ -7,12 +7,11 @@ class Request{
         int idClient;
         std::string wordToSearch;
         bool endRequest;
+        std::vector<std::vector<Search_Result>> searchResults;
     
     public:
          Request();
     
-        std::promise<std::queue<Search_Result>> prom;
-        std::future<std::queue<Search_Result>> fut= prom.get_future();
 
 
     Request(int idRequest, int idClient, std::string wordToSearch): idRequest(idRequest), idClient(idClient), wordToSearch(wordToSearch){}
@@ -50,5 +49,10 @@ class Request{
         endRequest = true;
     }
 
-
+    std::vector<std::vector<Search_Result>> getSearchResults(){
+        return searchResults;
+    }
+    void setSearchResults(std::vector<std::vector<Search_Result>> Search_Result){
+        this->searchResults=searchResults;
+    }
 };
