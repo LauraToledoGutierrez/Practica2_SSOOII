@@ -1,3 +1,5 @@
+#pragma once
+
 #include "definitions.h"
 #include "request.h"
 
@@ -146,3 +148,4 @@ public:
         this->finalLine = finalLine;
     }
 };
+

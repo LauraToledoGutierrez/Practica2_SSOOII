@@ -9,7 +9,17 @@
 #include "search_result.h"
 
 /*Variables globales*/
-std::vector<std::thread> vThreadClient;
+
+std::queue<Search_Result> queueResults;
+std::vector<Request> clientRequestFree;
+std::vector<Request> clientRequestPremium;
+std::vector<Client> listClients;
+std::vector<Request> requestsDone;
+
+
+std::queue<Client> q_clients_pay;
+std::queue<Client> q_client_find;
+/*std::vector<std::thread> vThreadClient;
 std::vector<std::string> bookPath;
 std::vector<Request> requestsDone;
 
@@ -37,7 +47,7 @@ std::atomic<int> g_id_client(0);
 std::vector<std::string> books = {"./17-LEYES-DEL-TRABJO-EN-EQUIPO.txt", "./21-LEYES-DEL-LIDERAZGO.txt", "./25-MANERAS-DE-GANARSE-A-LA-GENTE.txt",
 "./ACTITUD-DE-VENDEDOR.txt", "./El-oro-y-la-ceniza.txt", "./La-última-sirena.txt", "./prueba.txt",
 "./SEAMOS-PERSONAS-DE-INFLUENCIA.txt", "./VIVE-TU-SUEÑO.txt"};
-
+*/
 
 
 
@@ -256,6 +266,7 @@ int compareClient(Request request)
             return i;
         }
     }
+    return;
 }
 
 /* La idea de este metodo es que va a ser ejecutado por los buscadores. En este metodo controlamos las peticiones de busqueda y vemos el saldo que

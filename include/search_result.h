@@ -1,3 +1,5 @@
+#pragma once
+
 #include "definitions.h"
 
 
@@ -34,3 +36,5 @@ class Search_Result
             return nextWord;
         }
 };
+
+#pragma once

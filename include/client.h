@@ -1,4 +1,6 @@
-#include "definitions.h"
+#pragma once
+
+#include <definitions.h>
 #include "request.h"
 
 
@@ -24,7 +26,7 @@ public:
      * Version: 1.0
      * Date: 10/04/2022
      * *************************************/
-    void operator()() const
+    void operator()() 
     {
         std::vector<std::string> dictionary = {"casa", "telefono", "final"};
         srand(time(NULL));
@@ -91,3 +93,4 @@ public:
         balance = newSaldo;
     }
 };
+

@@ -8,7 +8,6 @@ CPPFLAGS:= -I$(DIRHEA) -c -std=c++11
 LDLIBS := -pthread
 CC := g++
 
-INC := include/color.h include/
 
 all: dirs SSOOIIGLE 
 
