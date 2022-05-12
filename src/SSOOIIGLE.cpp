@@ -297,16 +297,21 @@ void printResults(Request req)
 {
     int counter=0;
     std::vector<std::vector<Search_Results>> results;
+    std::ofstream file;
+
+    std::string id = req.getIdClient();
+    std::string path = "./results/client_" + id + ".txt";
+    file.open(path);
     results=req.getSearchResults();
-    std::cout << BLUE << "[Cliente: " << req.getIdClient() << " ";
+    file << BLUE << "[Client: " << req.getIdClient() << " ";
     for(int i=0;i<results.size();i++){
     
         for(int j=0;j<results[i].size();j++){
 
-            std::cout << BLUE << " :: Line " << results[i][j].getResultLine() << " ";
-            std::cout << GREEN << "... " << results[i][j].getPreviousWord() << " ";
-            std::cout << RED << req.getwordToSearch << " ";
-            std::cout << BLUE << results[i][j].getNextWord() << " ..." << std::endl;
+            file << BLUE << " :: Line " << results[i][j].getResultLine() << " ";
+            file << GREEN << "... " << results[i][j].getPreviousWord() << " ";
+            file << RED << req.getwordToSearch << " ";
+            file << BLUE << results[i][j].getNextWord() << " ..." << std::endl;
 
             counter++;
 
