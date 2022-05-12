@@ -8,69 +8,26 @@
 #include "client.h"
 
 /*Variables globales*/
-std::vector<Finder> threadFinder; //! Posible a tomar por culo
-std::vector<std::thread> vThreadClient;
-std::vector<std::string> bookPath;
-std::vector<Request> requestsDone;
-
-std::queue<Search_Result> queueResults;
-std::vector<Request> clientRequestFree;
-std::vector<Request> clientRequestPremium;
-std::vector<Client> listClients;
-std::mutex mutex;
-std::mutex mutexQRequests;
-std::mutex mutexFinderChildren;
-std::mutex mutexReduceBalance;
-std::mutex mutexFinishedThreads;
-std::unique_lock<std::mutex> uniLockQRequests(mutexQRequests);
-std::unique_lock<std::mutex> uniLockFinderChildren(mutexFinderChildren);
-
-std::queue<Client> q_clients_pay;
-std::queue<Client> q_client_find;
-
-std::condition_variable cvClient;
-std::condition_variable cvPay;
-std::condition_variable cvFinder;
-
-std::atomic<int> g_id_request(0);
-std::atomic<int> g_id_client(0);
-std::vector<std::string> books = {"./17-LEYES-DEL-TRABJO-EN-EQUIPO.txt", "./21-LEYES-DEL-LIDERAZGO.txt", "./25-MANERAS-DE-GANARSE-A-LA-GENTE.txt",
-"./ACTITUD-DE-VENDEDOR.txt", "./El-oro-y-la-ceniza.txt", "./La-última-sirena.txt", "./prueba.txt",
-"./SEAMOS-PERSONAS-DE-INFLUENCIA.txt", "./VIVE-TU-SUEÑO.txt"};
 std::vector<std::string> readFile(std::string bookPath);
 int readLines();
 void createClient();
-void findWord(int nbook, int iteration, std::vector<std::string> vector);
+void findWord(int nbook, int iteration, std::vector<std::string> vector, int lowerLimit, int uppwerLimit, Request requestCurrent);
 std::string eraseSymbols(std::string line);
-void printResults();
+void printResults(Request req);
 void createPath();
 void systemPay();
 void finder();
+int asignBalance(int typeClient);
+void launchThreads();
+int compareClient(Request request);
+
 
 int main(int argc, char *argv[])
 {
 
-    /*Controla si se introducen los argumentos correctos*/
-    if (argc != 4)
-    {
-        std::cout << RED << "Numero de argumentos incorrecto! <nombre_fichero> <palabra> <numero_hilos>" << std::endl;
-        exit(1);
-    }
     std::cout << RESET << "\nBienvenido a " << BLUE << "SS" << RED << "O" << YELLOW << "O" << BLUE << "II" << GREEN << "GL" << RED << "E\n"
               << std::endl;
-
-    /*Guardamos los argumentos en variables*/
-    std::string bookPath(argv[1]);
-    std::string searchWord = argv[2];
-    int nThread = atoi(argv[3]);
-
-    // NOTA: RECORRER EL VECTOR DE LIBROS Y LLAMAR X VECES AL METODO -> CREAR METODO APARTE
-
-    // std::vector<std::string> vLines = readFile(bookPath);
-    // int nLines = vLines.size();
-
-    // createClient(nThread, nLines, searchWord, vLines);
-    printResults();
+    launchThreads();
 }
 
 //! DEPRECATED
@@ -317,7 +274,5 @@ void printResults(Request req)
         }
     }
 
-    std::cout << RESET << "\nLa palabra " << RED << threadFinder[0].getSearchedWord() << RESET << " aparece " << PINK << counter << RESET << " veces\n"
-              << " " << std::endl;
     std::cout << RESET << "Fin de " << BLUE << "SS" << RED << "O" << YELLOW << "O" << BLUE << "II" << GREEN << "GL" << RED << "E" << std::endl;
 }
