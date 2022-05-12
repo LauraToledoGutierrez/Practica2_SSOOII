@@ -16,6 +16,11 @@
 #include <sstream>
 #include <mutex>
 #include <atomic>
+#include "client.h"
+#include "colors.h"
+#include "finder.h"
+#include "request.h"
+#include "search_result.h"
 
 #define NUMBERCLIENTS 20
 #define NUMBERTHREADS 3
