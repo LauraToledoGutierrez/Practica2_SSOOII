@@ -1,6 +1,9 @@
+#include "definitions.h"
+#include "client.h"
+#include "colors.h"
+#include "finder.h"
+#include "request.h"
 
-#include <iostream>
-#include <queue>
 class Search_Result
 {
     private:

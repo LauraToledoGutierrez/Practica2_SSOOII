@@ -1,8 +1,9 @@
-
-#include <iostream>
-#include <queue>
-#include "search_result.h"
 #include "definitions.h"
+#include "client.h"
+#include "colors.h"
+#include "request.h"
+#include "search_result.h"
+
 class Finder
 {
 private:

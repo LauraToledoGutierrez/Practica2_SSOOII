@@ -1,8 +1,8 @@
-#include <iostream>
-#include <bits/stdc++.h>
-#include <queue>
-#include "request.h"
 #include "definitions.h"
+#include "colors.h"
+#include "finder.h"
+#include "request.h"
+#include "search_result.h"
 
 class Client
 {

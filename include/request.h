@@ -1,4 +1,8 @@
-#include <finder.h>
+#include "definitions.h"
+#include "client.h"
+#include "colors.h"
+#include "finder.h"
+#include "search_result.h"
 
 class Request{
     private:
