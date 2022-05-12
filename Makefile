@@ -1,6 +1,3 @@
-FILE := El-oro-y-la-ceniza.txt
-WORD := superviviente
-NTHREADS := 20
 
 DIROBJ := obj/
 DIREXE := exec/
@@ -25,7 +22,7 @@ $(DIROBJ)%.o: $(DIRSRC)%.cpp
 	$(CC) $(CPPFLAGS) $^ -o $@
 
 ejecutar:
-	./$(DIREXE)SSOOIIGLE $(DIRBOOKS)$(FILE) $(WORD) $(NTHREADS)
+	./$(DIREXE)SSOOIIGLE 
 
 clean:
 	rm -rf *~ core $(DIROBJ) $(DIREXE) $(DIRHEA)*~ 
