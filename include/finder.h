@@ -17,7 +17,7 @@ public:
                                       "./ACTITUD-DE-VENDEDOR.txt", "./El-oro-y-la-ceniza.txt", "./La-última-sirena.txt", "./prueba.txt",
                                       "./SEAMOS-PERSONAS-DE-INFLUENCIA.txt", "./VIVE-TU-SUEÑO.txt"};
     int tamanio= books.size();
-    std::vector<std::thread> vFinderThreads(tamanio);
+    std::vector<std::thread> vFinderThreads;
 
     /***********************************
      * Method: createFinderThreads
