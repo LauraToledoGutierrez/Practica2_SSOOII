@@ -293,28 +293,26 @@ std::string eraseSymbols(std::string line)
 }
 /*Imprimimos los resultados*/
 //FIXME
-void printResults(std::vector<std::vector<Search_Result>> results, int idClient)
+void printResults(Request req)
 {
     int counter=0;
+    std::vector<std::vector<Search_Results>> results;
+    results=req.getSearchResults();
+    std::cout << BLUE << "[Cliente: " << req.getIdClient() << " ";
+    for(int i=0;i<results.size();i++){
+    
+        for(int j=0;j<results[i].size();j++){
 
-    for (int i = 0; i < threadFinder.size(); i++)
-    {
-        std::queue<Search_Result> queue = threadFinder[i].getQueueResults();
-
-        while (!queue.empty())
-        {
-            std::cout << BLUE << "[Hilo: " << threadFinder[i].getId();
-            std::cout << RED << " Inicio: " << threadFinder[i].getInitialLine();
-            std::cout << YELLOW << " - final: " << threadFinder[i].getFinalLine() << "]";
-            std::cout << BLUE << " :: line " << queue.front().getresultLine() << " ";
-            std::cout << GREEN << "... " << queue.front().getPreviousWord() << " ";
-            std::cout << RED << threadFinder[i].getSearchedWord() << " ";
-            std::cout << BLUE << queue.front().getNextWord() << " ..." << std::endl;
+            std::cout << BLUE << " :: Line " << results[i][j].getResultLine() << " ";
+            std::cout << GREEN << "... " << results[i][j].getPreviousWord() << " ";
+            std::cout << RED << req.getwordToSearch << " ";
+            std::cout << BLUE << results[i][j].getNextWord() << " ..." << std::endl;
 
             counter++;
-            queue.pop();
+
         }
-    }
+        }
+        
     std::cout<<RESET<<"\nLa palabra "<<RED<<threadFinder[0].getSearchedWord()<<RESET<<" aparece " <<PINK<< counter <<RESET<< " veces\n" <<" "<<std::endl;
     std::cout << RESET << "Fin de " << BLUE << "SS" <<RED<< "O"<< YELLOW <<"O"<<BLUE<<"II"<<GREEN<< "GL"<<RED<< "E"<<std::endl;
 
