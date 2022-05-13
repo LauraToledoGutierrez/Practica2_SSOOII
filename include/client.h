@@ -90,6 +90,7 @@ public:
                     t1 = clock();
                     totalTime = (t1 - t0) / CLOCKS_PER_SEC;
                     printResults(requestsDone[i], totalTime);
+                    std::cout << "Results finished and printed" << std::endl;
                 }
             }
         }
