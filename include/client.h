@@ -1,3 +1,10 @@
+/**************************************************
+ * Class: Client
+ * Description: Holds the definition of the Client
+ *  object and the functionality of the Client thread
+ *
+ *************************************************/
+
 #pragma once
 
 #ifndef Client
@@ -5,6 +12,7 @@
 #include "request.h"
 #include "./definitions.h"
 
+/*External methods and variables from the SSOOIIGLE.cpp defined*/
 extern std::vector<Request> clientRequestFree;
 extern std::vector<Request> requestsDone;
 extern std::vector<Request> clientRequestPremium;
@@ -13,101 +21,121 @@ extern std::vector<std::string> readFile(std::string bookPath);
 extern void findWord(int nbook, int iteration, std::vector<std::string> vector, int lowerLimit, int uppwerLimit, Request requestCurrent);
 extern void systemPay();
 
-
 class Client
 {
-    int idClient;
-    int typeClient; // 0: Premium
-                    // 1: Premium with balance
-                    // 2: Free
-    int balance;
+    int idClient;   // Holds an unique ID that identifies the client
+    int typeClient; // Contains the type of the client
+                    // 0: Premium Plus       1: Premium with balance     2: Free
+    int balance; // Contains the balance of each client. In case of Premium Plus, balance= INT_MAX
 
-    Request request;
-    
+    Request request; // We create the request that each client will create
 
 public:
-
-    
-
     /***************************************
-     * Description: When calling a client thread, this will be the execution of that theads 
-     *      (Enqueueing requests, waiting fo the results of the search and printing the results)
+     * Description: When creating a client thread, this will be the execution of those theads
+     *      (They perform the enqueueing of the requests, waiting for the results of the search and printing the results)
      * Parameters: None
      * Version: 1.0
      * Date: 10/04/2022
      * *************************************/
-    void operator()() 
+    void operator()()
     {
-        std::vector<std::string> dictionary = {"casa", "telefono", "final"};
+        std::vector<std::string> dictionary = {"casa", "telefono", "final"}; // Dictionary of all the available words to be searched
         srand(time(NULL));
-        int wordToSearch= rand()%dictionary.size();
-        int idRequest= g_id_request++;
-        std::cout<<"Se ha lanzado el cliente "<<idClient<<" de tipo "<<typeClient<< " y busca la palabra "<<dictionary[wordToSearch]<<std::endl;
-        std::cout << balance<<std::endl;
-        Request request(idRequest, idClient, dictionary[wordToSearch], typeClient);
+        int wordToSearch = rand() % dictionary.size(); // Pick a random word from the dictionary
+        int idRequest = g_id_request++;                // Assign a unique ID for this Request
+        std::cout << "Client: " << idClient << " type: " << typeClient << " and searching word: " << dictionary[wordToSearch] << " has been launched." << std::endl;
+        Request request(idRequest, idClient, dictionary[wordToSearch], typeClient); // Initialize the request
 
-        if(typeClient==2){
+        /** Different implementations for different kind of clients **/
+        if (typeClient == 2)
+        {
             mutexAlgo.lock();
-            //std::cout<<"HOLA"<<std::endl;
             std::unique_lock<std::mutex> uniLockQRequests(mutexQRequests); //* Mutual exclusion for enqueueing Requests
             clientRequestFree.push_back(std::move(request));
             cvClient.notify_one(); //*Notify Finder thread so that they search into the queue
-            //uniLockQRequests.unlock();
+            // uniLockQRequests.unlock(); //?FIXME
 
-            //std::queue<Search_Result> results= clientRequestFree.front().getIdClient().fut.get();
-            for(int i=0; i<requestsDone.size(); i++){
-                if(requestsDone[i].getIdClient()==idClient){
+            /* Once the search is found, we look into the requestsDone vector */
+            for (int i = 0; i < requestsDone.size(); i++)
+            { 
+                /*If the client ID from the finalized requests is the same than ours*/
+                if (requestsDone[i].getIdClient() == idClient)
+                { 
                     printResults(requestsDone[i]);
                 }
             }
             mutexAlgo.unlock();
-
         }
-        else{
-            //std::cout<<"ADIOS"<<std::endl;
+        /** If client is Premium or Premium Plus **/
+        else
+        {
             std::unique_lock<std::mutex> uniLockQRequests(mutexQRequests);
-            clientRequestPremium.push_back(std::move(request));
+            clientRequestPremium.push_back(std::move(request)); // Enqueue requests on the premium requests queue
             cvClient.notify_one();
-            //uniLockQRequests.unlock();
+            //uniLockQRequests.unlock(); //?FIXME
 
-            for(int i=0; i<requestsDone.size(); i++){
-                if(requestsDone[i].getIdClient()==idClient){
+            for (int i = 0; i < requestsDone.size(); i++)
+            {
+                if (requestsDone[i].getIdClient() == idClient)
+                {
                     printResults(requestsDone[i]);
                 }
             }
-            
         }
-
-
     }
-    
 
     Client() {}
-    Client(int idClient, int typeClient, int balance, Request request) : idClient(idClient), typeClient(typeClient), balance(balance), request(request){}
+    Client(int idClient, int typeClient, int balance, Request request) : idClient(idClient), typeClient(typeClient), balance(balance), request(request) {}
 
+    /*********
+     *Method: getIdClient
+     *Description: Returns the id of this Client
+     *Return type: int
+     */
     int getidClient()
     {
         return idClient;
     }
 
+    /*********
+     *Method: setIdClient
+     *Description: Updates the id of this client
+     *Parameters: int id of the client
+     */
     void setidClient(int idC)
     {
         this->idClient = idC;
     }
 
+    /*********
+     *Method: getTypeClient
+     *Description: Returns the type this client is
+     *Return type: int
+     */
     int getTypeClient()
     {
         return typeClient;
     }
 
+    /*********
+     *Method: getBalance
+     *Description: Returns the remaining balance of this client
+     *Return type: int
+     */
     int getBalance()
     {
         return balance;
     }
 
-    void setBalance(int newSaldo)
+    /*********
+     *Method: setBalance
+     *Description: Updates the balance of this client
+     *Parameters: int newBalance
+     */
+    void setBalance(int newBalance)
     {
-        balance = newSaldo;
+        balance = newBalance;
     }
 };
 
