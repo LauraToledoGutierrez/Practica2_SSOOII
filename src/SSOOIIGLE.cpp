@@ -238,7 +238,7 @@ std::string eraseSymbols(std::string line)
     return line;
 }
 /*Imprimimos los resultados*/
-void printResults(Request req)
+void printResults(Request req, double time_exe)
 {
     int counter = 0;
     std::vector<Search_Result> results;
@@ -255,6 +255,7 @@ void printResults(Request req)
         file << GREEN << "... " << results[i].getPreviousWord() << " ";
         file << RED << req.getwordToSearch() << " ";
         file << BLUE << results[i].getNextWord() << " ..." << std::endl;
+        file << " El tiempo de ejecucion del cliente " << req.getIdClient() << " es de " << time_exe << " segundos.\n ";
 
         counter++;
     }
