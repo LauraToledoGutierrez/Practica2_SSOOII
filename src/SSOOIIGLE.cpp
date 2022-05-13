@@ -42,6 +42,32 @@ int main(int argc, char *argv[])
 }
 
 /***********************************
+ * Method: launchThreads
+ * Description: Launchs the different type of thread (threads of finder, thread of system pay and threads of clients)
+ ***********************************/
+void launchThreads()
+{
+    //Vector to save the differents threads generated
+    std::vector<std::thread> vThread;
+
+    std::cout << RED<<"Launch system pay"<<RESET << std::endl;
+    //Launchs the thread of system pay
+    vThread.push_back(std::thread(std::move(systemPay)));
+
+    //Launchs the diferents threads of finder
+    for (int i = 0; i < NUMBERFINDER; i++)
+    {
+        Finder finder("",0,0,0);
+        vThread.push_back(std::thread(std::move(finder)));
+        std::cout << GREEN<<"Launch finder" <<RESET<< std::endl;
+    }
+    //Launchs the threads of client
+    createClient();
+    
+    std::for_each(vThreadClient.begin(), vThreadClient.end(), std::mem_fn(&std::thread::join));
+}
+
+/***********************************
  * Method: createClient()
  * Description: Creates the clients of our program with the corresponding attributes. 
  *  Creates every 15 seconds the defined number of clients.
@@ -100,32 +126,6 @@ int asignBalance(int typeClient)
         break;
     }
     return balance_;
-}
-
-/***********************************
- * Method: launchThreads
- * Description: Launchs the different type of thread (threads of finder, thread of system pay and threads of clients)
- ***********************************/
-void launchThreads()
-{
-    //Vector to save the differents threads generated
-    std::vector<std::thread> vThread;
-
-    std::cout << RED<<"Launch system pay"<<RESET << std::endl;
-    //Launchs the thread of system pay
-    vThread.push_back(std::thread(std::move(systemPay)));
-
-    //Launchs the diferents threads of finder
-    for (int i = 0; i < NUMBERFINDER; i++)
-    {
-        Finder finder("",0,0,0);
-        vThread.push_back(std::thread(std::move(finder)));
-        std::cout << GREEN<<"Launch finder" <<RESET<< std::endl;
-    }
-    //Launchs the threads of client
-    createClient();
-    
-    std::for_each(vThreadClient.begin(), vThreadClient.end(), std::mem_fn(&std::thread::join));
 }
 
 /***********************************
