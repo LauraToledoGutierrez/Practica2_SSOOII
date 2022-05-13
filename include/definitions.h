@@ -23,7 +23,7 @@
 #include <atomic>
 #include <bits/stdc++.h>
 
-#define NUMBERCLIENTS 4
+#define NUMBERCLIENTS 6
 #define NUMBERTHREADS 1
 #define NUMBERFINDER 4
 
