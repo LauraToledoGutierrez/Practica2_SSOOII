@@ -57,12 +57,14 @@ public:
             {
                 req = clientRequestPremium.front(); 
                 clientRequestPremium.pop_back();
+                std::cout << "Request Premium catched" << std::endl;
             }
             
             else if (!clientRequestFree.empty())
             {
                 req = clientRequestFree.front();
                 clientRequestFree.pop_back();
+                std::cout << "Request Free catched" << std::endl;
             }
             else
             {
@@ -108,6 +110,7 @@ public:
                 }
                 else if (!req.getEndRequest())  //The request isn't finished
                 {
+                    std::cout << "Calling systemPay" << std::endl;
                     systemPay();
                 }
             }
