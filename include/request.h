@@ -1,20 +1,34 @@
-#include <finder.h>
+#pragma once
+
+#include "definitions.h"
+#include "search_result.h"
 
 class Request{
     private:
         //int book;
         int idRequest;
+        int idClient;
+        int typeClient;
         std::string wordToSearch;
+        int finishedThreads; //Amount of finder threads that have already finished
         bool endRequest;
     
     public:
          Request();
+    
+    //std::vector<std::vector<Search_Result>> searchResults;
+    std::vector<Search_Result> searchResults;
 
-    Request(int, std::string);
+
+    Request(int idRequest, int idClient, std::string wordToSearch, int typeClient): idRequest(idRequest), idClient(idClient), wordToSearch(wordToSearch), typeClient(typeClient){}
 
     int getIdRequest()
     {
         return idRequest;
+    }
+    int getIdClient()
+    {
+        return idClient;
     }
 
     /*int getBook()
@@ -41,4 +55,17 @@ class Request{
         endRequest = true;
     }
 
+    std::vector<Search_Result> getSearchResults(){
+        return searchResults;
+    }
+    void setSearchResults(std::vector<std::vector<Search_Result>> Search_Result){
+        this->searchResults=searchResults;
+    }
+    int getFinishedThreads(){
+        return finishedThreads;
+    }
+    void setFinishedThreads(int finishedThreads){
+        this->finishedThreads=finishedThreads;
+    }
 };
+

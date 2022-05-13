@@ -1,6 +1,8 @@
+#pragma once
 
-#include <iostream>
-#include <queue>
+#include "./definitions.h"
+
+
 class Search_Result
 {
     private:
@@ -34,3 +36,5 @@ class Search_Result
             return nextWord;
         }
 };
+
+#pragma once
