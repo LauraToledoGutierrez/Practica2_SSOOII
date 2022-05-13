@@ -134,8 +134,6 @@ int asignBalance(int typeClient)
  ***********************************/
 void systemPay()
 {
-    // Semaforo para sincronizacion y pasarle el id del cliente
-
     int newBalance = 20;
     std::mutex mutex_pay;
     std::unique_lock<std::mutex> lk(mutex_pay);
