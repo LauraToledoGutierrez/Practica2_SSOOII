@@ -1,12 +1,18 @@
+/***********************************
+ * Class: Finder
+ * Description: This class is the finder that searches the word in the method findWord in the main class. Creates the "Master" Finder threads
+ * which funcionality is to find the word in all of books 
+ * Date: 13/05/2022
+ ***********************************/
 #pragma once
 
 #include "definitions.h"
 #include "request.h"
 #include "search_result.h"
 
+extern std::vector<Request> clientRequestPremium;
 extern std::vector<Request> clientRequestFree;
 extern std::vector<Request> requestsDone;
-extern std::vector<Request> clientRequestPremium;
 extern void printResults(Request req);
 extern std::vector<std::string> readFile(std::string bookPath);
 extern void findWord(int nbook, int iteration, std::vector<std::string> vector, int lowerLimit, int uppwerLimit, Request requestCurrent);
@@ -14,16 +20,10 @@ extern void systemPay();
 
 class Finder
 {
-    /***********************************
-     * Class: Finder
-     * Description: This class is the finder that searches the word in the method findWord in the main class. Creates the "Master" Finder threads
-     * which funcionality is to find the word in all of books 
-     * Date: 13/05/2022
-     ***********************************/
 private:
     std::string searchedWord;       //Word that the client want to search in all books
-    int id; 
-    int initialLine;                // First line of the book
+    int id;                         //ID for each Finder
+    int initialLine;                //First line of the book
     int finalLine;                  //The last line of the book
 
 public:
@@ -36,7 +36,6 @@ public:
      * Method: operator()
      * Description: The finder takes the Request from the queue clientRequestFree and clientRequestPremium and creates the "children" Finder threads
      * one for each book which execute the method findWord
-     * 
      * Version: 1.0
      * Date: 13/05/2022
      ***********************************/
@@ -44,9 +43,9 @@ public:
     {
         Request req(0,0,"",0); //An object of Request
         std::mutex mutex; //Mutex
+        std::mutex prueba;
         Search_Result sr; //An object of Search_Results
 
-    
         while (1)
         {
             cvClient.wait(uniLockQRequests, []
@@ -57,25 +56,26 @@ public:
             {
                 req = clientRequestPremium.front(); 
                 clientRequestPremium.pop_back();
+                std::cout << "Request Premium catched" << std::endl;
             }
             
             else if (!clientRequestFree.empty())
             {
                 req = clientRequestFree.front();
                 clientRequestFree.pop_back();
+                std::cout << "Request Free catched" << std::endl;
             }
             else
             {
                 std::cout << RED<<"No available requests" << RESET<<std::endl; //The queues are empty
             }
-            // Functionality Children Finder
             
-            for (int i = 0; i < books.size(); i++)
+            for (int i = 0; i < books.size(); i++) //For each book in the vector books
             {
                 std::vector<std::string> fileToRead = readFile(books[i]);
 
-                // METHOD CREATEFINDERTHREADS
-                for (int j = 0; j < NUMBERTHREADS; j++)
+                // 
+                for (int j = 0; j < NUMBERTHREADS; j++) //For each thread which we want to divide the book
                 {
                     int lowerLimit, upperLimit; //Limits 
 
@@ -106,47 +106,81 @@ public:
                     requestsDone.push_back(req); 
                     break;
                 }
+                //FIXME
                 else if (!req.getEndRequest())  //The request isn't finished
                 {
+                    break;
+                    std::cout << "Calling systemPay" << std::endl;
                     systemPay();
+                    
                 }
             }
         }
         std::for_each(vFinderThreads.begin(), vFinderThreads.end(), std::mem_fn(&std::thread::join));
     }
 
-    // Constructor, getters and setters
 
     Finder() {}
     Finder(std::string palabra, int Id, int firstLine, int lastLine) : searchedWord(palabra), id(Id), initialLine(firstLine), finalLine(lastLine) {}
-
+    /*********
+     *Method: getSearchesWord
+     *Description: Returns the word that the client want to search
+     *Return type: string
+     */
     std::string getSearchedWord()
     {
         return searchedWord;
     }
-
+    /*********
+     *Method: setId
+     *Description: Updates ID of the finder
+     *Parameters: int id
+     */
     void setId(int id)
     {
         this->id = id;
     }
+    /*********
+     *Method: getId
+     *Description: Returns the id of this Finder
+     *Return type: int
+     */
     int getId()
     {
         return id;
     }
-
+    /*********
+     *Method: getInitialLine
+     *Description: Returns the initial line of book
+     *Return type: int
+     */
     int getInitialLine()
     {
         return initialLine;
     }
+    /*********
+     *Method: setInitialLine
+     *Description: Updates initial line of the book
+     *Parameters: int initialLine
+     */
     void setInitialLine(int initialLine)
     {
         this->initialLine = initialLine;
     }
-
+       /*********
+     *Method: getInitialLine
+     *Description: Returns the final line of book
+     *Return type: int
+     */
     int getFinalLine()
     {
         return finalLine;
     }
+    /*********
+     *Method: setFinalLine
+     *Description: Updates final line of the book
+     *Parameters: int finalLine
+     */
     void setFinalLine(int finalLine)
     {
         this->finalLine = finalLine;
