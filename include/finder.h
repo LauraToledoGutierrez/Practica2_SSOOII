@@ -4,9 +4,9 @@
 #include "request.h"
 #include "search_result.h"
 
+extern std::vector<Request> clientRequestPremium;
 extern std::vector<Request> clientRequestFree;
 extern std::vector<Request> requestsDone;
-extern std::vector<Request> clientRequestPremium;
 extern void printResults(Request req);
 extern std::vector<std::string> readFile(std::string bookPath);
 extern void findWord(int nbook, int iteration, std::vector<std::string> vector, int lowerLimit, int uppwerLimit, Request requestCurrent);
@@ -44,9 +44,9 @@ public:
     {
         Request req(0,0,"",0); //An object of Request
         std::mutex mutex; //Mutex
+        std::mutex prueba;
         Search_Result sr; //An object of Search_Results
 
-    
         while (1)
         {
             cvClient.wait(uniLockQRequests, []
@@ -108,10 +108,13 @@ public:
                     requestsDone.push_back(req); 
                     break;
                 }
+                //FIXME
                 else if (!req.getEndRequest())  //The request isn't finished
                 {
+                    break;
                     std::cout << "Calling systemPay" << std::endl;
                     systemPay();
+                    
                 }
             }
         }
