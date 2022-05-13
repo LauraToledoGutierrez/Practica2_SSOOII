@@ -9,7 +9,6 @@
 #include "search_result.h"
 
 /*Variables globales*/
-
 std::queue<Search_Result> queueResults;
 std::vector<Request> clientRequestFree;
 std::vector<Request> clientRequestPremium;
@@ -18,9 +17,6 @@ std::vector<Request> requestsDone;
 
 std::queue<Client> q_clients_pay;
 std::queue<Client> q_client_find;
-
-std::mutex mutexBalance;
-
 
 std::vector<std::string> readFile(std::string bookPath);
 int readLines();
@@ -35,25 +31,12 @@ int asignBalance(int typeClient);
 void launchThreads();
 int compareClient(Request request);
 
-
 int main(int argc, char *argv[])
 {
-
     std::cout << RESET << "\nBienvenido a " << BLUE << "SS" << RED << "O" << YELLOW << "O" << BLUE << "II" << GREEN << "GL" << RED << "E\n"
               << std::endl;
     launchThreads();
 }
-
-//! DEPRECATED
-/* Creamos la ruta de los libros y llamamos al metodo readFile para dividir el fichero en lineas */
-/* void createPath()
-{
-    std::string path = "Libros_P2/";
-    for (int i = 0; i < (int)books.size(); i++) {
-        bookPath.push_back(path + books[i]);
-        std::vector<std::string> vLines = readFile(bookPath[i]);
-    }
-}*/
 
 void createClient()
 {
@@ -67,18 +50,14 @@ void createClient()
             int typeClient = rand() % (3);
             int balance = asignBalance(typeClient);
 
-            // El libro de cada cliente no se si lo tenemos que meter en la clase cliente, que supongo, es lo que mas sentido tiene
             g_id_client++;
             Client client(g_id_client, typeClient, balance, req);
             listClients.push_back(client);
             vThreadClient.push_back(std::thread(std::move(client)));
-            //std::cout<<"Se han lanzado un cliente  "<<client.getTypeClient()<<" y busca la palabra "<<req.getwordToSearch()<<std::endl;
             std::this_thread::sleep_for(std::chrono::seconds(1));
             mutexBalance.unlock();
-            
         }
         std::this_thread::sleep_for(std::chrono::seconds(15));
-        //std::for_each(vThreadClient.begin(), vThreadClient.end(), std::mem_fn(&std::thread::join));
     }
 }
 int asignBalance(int typeClient)
@@ -135,7 +114,6 @@ void systemPay()
     {
         cvPay.wait(lk, []
                    { return !q_clients_pay.empty(); });
-
         Client client = q_clients_pay.front();
         q_clients_pay.pop();
         std::cout << "El cliente " << client.getidClient() << " esta en el sistema de pago." << std::endl;
@@ -169,17 +147,11 @@ void findWord(int nbook, int iteration, std::vector<std::string> vector, int low
     Search_Result results;
     int resultLine;
 
-    
-
-    //std::cout <<"EEEEEEEEEEEEEEY"<<std::endl;
-    //std::cout <<upperLimit<<std::endl;
-
     int indexClient = compareClient(requestCurrent);
 
     // IMPLEMENTATION OF FINDING WORD
     for (int i = lowerLimit; i < upperLimit; i++)
     {
-        //std::cout <<"EEEEEEEEEEEEEEY"<<std::endl;
         std::string line = eraseSymbols(vector[i]);
         /*Transformamos todas v_hilosas palabras de la linea en minusculas*/
         std::transform(line.begin(), line.end(), line.begin(), ::tolower);
@@ -193,12 +165,10 @@ void findWord(int nbook, int iteration, std::vector<std::string> vector, int low
             /*Si la palabra que estamos mirando es igual a la que buscamos*/
             if (words[j].compare(requestCurrent.getwordToSearch()) == 0 && listClients[indexClient].getBalance() > 0)
             {
-                std::cout <<"EEEEEEEEEEEEEEY"<<std::endl;
                 mutexReduceBalance.lock();
                 listClients[indexClient].setBalance(listClients[indexClient].getBalance()-1);
                 mutexReduceBalance.unlock();
 
-                // std::cout<<"Palabra encontrada en linea "<<i+1+lineaR<<std::endl;
                 results.setresultLine(i);
                 /*Si es la primera palabra de la linea*/
                 if (j == 0)
@@ -211,15 +181,11 @@ void findWord(int nbook, int iteration, std::vector<std::string> vector, int low
                 else
                     results.setNextWord(words[j + 1]);
 
-
-                /*Metemos los resultados en la cola resultados*/
-                // queueResults.push(results);
-
-                requestCurrent.searchResults[nbook].push_back(results);
+                requestCurrent.searchResults.push_back(results);
+                cvFinder.notify_one();
             //!AQUI HAY ERROR CREO POR QUE SI PONES PRINT DA VIOLACION DE SEGMENTO
             } else if(listClients[indexClient].getTypeClient()==2 && listClients[indexClient].getBalance()<1){
                 //TODO printf
-                //printf("NO TIENE SALDO");
                 requestCurrent.end_Request();
                 requestsDone.push_back(requestCurrent);
                 cvFinder.notify_one();
@@ -237,10 +203,10 @@ void findWord(int nbook, int iteration, std::vector<std::string> vector, int low
             cvFinder.notify_one();
         }
     }
-    if (listClients[indexClient].getBalance() == 0 && !requestCurrent.getEndRequest() && listClients[indexClient].getTypeClient() == 2) //Pay System
+    if (listClients[indexClient].getBalance() == 0 && !requestCurrent.getEndRequest() && listClients[indexClient].getTypeClient() == 1) //Pay System
     {
         q_clients_pay.push(listClients[indexClient]);
-        cvFinder.notify_one();
+        cvPay.notify_one();
     }
 }
 
@@ -255,13 +221,6 @@ int compareClient(Request request)
         }
     }
     return 0;
-}
-
-/* La idea de este metodo es que va a ser ejecutado por los buscadores. En este metodo controlamos las peticiones de busqueda y vemos el saldo que
-le queda a cada cliente y si no tiene saldo llamamos al sistema de pago */
-void finder()
-{
-    //¿Cola de peticiones? -> si no esta vacia -> buscamos la palabra -> si no tiene saldo -> llamar al systemPay
 }
 
 /*Eliminamos cualquier simbolo que pueda aparecer en el libro que no sea letra*/
@@ -279,11 +238,10 @@ std::string eraseSymbols(std::string line)
     return line;
 }
 /*Imprimimos los resultados*/
-// FIXME
 void printResults(Request req)
 {
     int counter = 0;
-    std::vector<std::vector<Search_Result>> results;
+    std::vector<Search_Result> results;
     std::ofstream file;
 
     std::string id = std::to_string(req.getIdClient());
@@ -293,17 +251,12 @@ void printResults(Request req)
     file << BLUE << "[Client: " << req.getIdClient() << " ";
     for (int i = 0; i < results.size(); i++)
     {
+        file << BLUE << " :: Line " << results[i].getresultLine() << " ";
+        file << GREEN << "... " << results[i].getPreviousWord() << " ";
+        file << RED << req.getwordToSearch() << " ";
+        file << BLUE << results[i].getNextWord() << " ..." << std::endl;
 
-        for (int j = 0; j < results[i].size(); j++)
-        {
-
-            file << BLUE << " :: Line " << results[i][j].getresultLine() << " ";
-            file << GREEN << "... " << results[i][j].getPreviousWord() << " ";
-            file << RED << req.getwordToSearch() << " ";
-            file << BLUE << results[i][j].getNextWord() << " ..." << std::endl;
-
-            counter++;
-        }
+        counter++;
     }
 
     std::cout << RESET << "Fin de " << BLUE << "SS" << RED << "O" << YELLOW << "O" << BLUE << "II" << GREEN << "GL" << RED << "E" << std::endl;

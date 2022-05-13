@@ -23,7 +23,7 @@
 #include <bits/stdc++.h>
 
 #define NUMBERCLIENTS 4
-#define NUMBERTHREADS 3
+#define NUMBERTHREADS 1
 #define NUMBERFINDER 4
 
 std::vector<std::thread> vThreadClient;
@@ -34,6 +34,8 @@ std::mutex mutexQRequests;
 std::mutex mutexFinderChildren;
 std::mutex mutexReduceBalance;
 std::mutex mutexFinishedThreads;
+std::mutex mutexBalance;
+std::mutex g_sem_peticiones_pendientes;
 std::unique_lock<std::mutex> uniLockQRequests(mutexQRequests);
 std::unique_lock<std::mutex> uniLockFinderChildren(mutexFinderChildren);
 
@@ -47,3 +49,4 @@ std::atomic<int> g_id_client(0);
 std::vector<std::string> books = {"./Libros_P2/17-LEYES-DEL-TRABJO-EN-EQUIPO.txt", "./Libros_P2/21-LEYES-DEL-LIDERAZGO.txt", "./Libros_P2/25-MANERAS-DE-GANARSE-A-LA-GENTE.txt",
 "./Libros_P2/ACTITUD-DE-VENDEDOR.txt", "./Libros_P2/El-oro-y-la-ceniza.txt", "./Libros_P2/La-última-sirena.txt", "./Libros_P2/prueba.txt",
 "./Libros_P2/SEAMOS-PERSONAS-DE-INFLUENCIA.txt", "./Libros_P2/VIVE-TU-SUEÑO.txt"};
+

@@ -13,7 +13,6 @@ extern std::vector<std::string> readFile(std::string bookPath);
 extern void findWord(int nbook, int iteration, std::vector<std::string> vector, int lowerLimit, int uppwerLimit, Request requestCurrent);
 extern void systemPay();
 
-
 class Client
 {
     int idClient;
@@ -21,13 +20,9 @@ class Client
                     // 1: Premium with balance
                     // 2: Free
     int balance;
-
     Request request;
     
-
 public:
-
-    
 
     /***************************************
      * Description: When calling a client thread, this will be the execution of that theads 
@@ -42,19 +37,15 @@ public:
         srand(time(NULL));
         int wordToSearch= rand()%dictionary.size();
         int idRequest= g_id_request++;
-        std::cout<<"Se ha lanzado el cliente "<<idClient<<" de tipo "<<typeClient<< " y busca la palabra "<<dictionary[wordToSearch]<<std::endl;
-        std::cout << balance<<std::endl;
         Request request(idRequest, idClient, dictionary[wordToSearch], typeClient);
+        std::cout<<"Se ha lanzado el cliente "<<idClient<<" de tipo "<<request.getTypeClient()<< " y busca la palabra "<<dictionary[wordToSearch]<<std::endl;
 
         if(typeClient==2){
             mutexAlgo.lock();
-            //std::cout<<"HOLA"<<std::endl;
             std::unique_lock<std::mutex> uniLockQRequests(mutexQRequests); //* Mutual exclusion for enqueueing Requests
-            clientRequestFree.push_back(std::move(request));
-            cvClient.notify_one(); //*Notify Finder thread so that they search into the queue
-            //uniLockQRequests.unlock();
+            clientRequestFree.push_back(request);
+            cvFinder.notify_one(); //*Notify Finder thread so that they search into the queue
 
-            //std::queue<Search_Result> results= clientRequestFree.front().getIdClient().fut.get();
             for(int i=0; i<requestsDone.size(); i++){
                 if(requestsDone[i].getIdClient()==idClient){
                     printResults(requestsDone[i]);
@@ -63,25 +54,21 @@ public:
             mutexAlgo.unlock();
 
         }
-        else{
-            //std::cout<<"ADIOS"<<std::endl;
+        else if(typeClient == 1 || typeClient == 0){
+            mutexAlgo.lock();
             std::unique_lock<std::mutex> uniLockQRequests(mutexQRequests);
-            clientRequestPremium.push_back(std::move(request));
+            clientRequestPremium.push_back(request);
             cvClient.notify_one();
-            //uniLockQRequests.unlock();
 
             for(int i=0; i<requestsDone.size(); i++){
                 if(requestsDone[i].getIdClient()==idClient){
                     printResults(requestsDone[i]);
                 }
             }
-            
+            mutexAlgo.unlock();
         }
-
-
     }
     
-
     Client() {}
     Client(int idClient, int typeClient, int balance, Request request) : idClient(idClient), typeClient(typeClient), balance(balance), request(request){}
 

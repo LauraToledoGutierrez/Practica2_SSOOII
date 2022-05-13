@@ -36,5 +36,3 @@ class Search_Result
             return nextWord;
         }
 };
-
-#pragma once

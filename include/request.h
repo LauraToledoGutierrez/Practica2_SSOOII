@@ -5,7 +5,6 @@
 
 class Request{
     private:
-        //int book;
         int idRequest;
         int idClient;
         int typeClient;
@@ -16,7 +15,7 @@ class Request{
     public:
          Request();
     
-    std::vector<std::vector<Search_Result>> searchResults;
+    std::vector<Search_Result> searchResults;
 
 
     Request(int idRequest, int idClient, std::string wordToSearch, int typeClient): idRequest(idRequest), idClient(idClient), wordToSearch(wordToSearch), typeClient(typeClient){}
@@ -29,16 +28,6 @@ class Request{
     {
         return idClient;
     }
-
-    /*int getBook()
-    {
-        return book;
-    }
-
-    void nextBook()
-    {
-        book++;
-    }*/
 
     std::string getwordToSearch()
     {
@@ -54,7 +43,7 @@ class Request{
         endRequest = true;
     }
 
-    std::vector<std::vector<Search_Result>> getSearchResults(){
+    std::vector<Search_Result> getSearchResults(){
         return searchResults;
     }
     void setSearchResults(std::vector<std::vector<Search_Result>> Search_Result){
@@ -65,6 +54,24 @@ class Request{
     }
     void setFinishedThreads(int finishedThreads){
         this->finishedThreads=finishedThreads;
+    }
+    std::string getTypeClient()
+    {
+        switch(typeClient)
+        {
+            case 0:
+                return "PREMIUM PLUS";
+                break;
+            case 1:
+                return "PREMIUM";
+                break;
+            case 2: 
+                return "FREE";
+                break;
+            default:
+                return "";
+                break;
+        }
     }
 };
 
