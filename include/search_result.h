@@ -5,6 +5,12 @@
 
 class Search_Result
 {
+    /***********************************
+     * Class: Search_Result
+     * Description: In this class we are going to save the attributes of a search (the previous and the next word to the one we want to find 
+     * and the line where the word is)
+     * Date: 13/05/2022
+     ***********************************/
     private:
         std::string previousWord;
         std::string nextWord;
@@ -36,5 +42,3 @@ class Search_Result
             return nextWord;
         }
 };
-
-#pragma once
