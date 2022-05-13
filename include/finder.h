@@ -66,7 +66,7 @@ public:
             }
             else
             {
-                std::cout << "No available requests" << std::endl; //The queues are empty
+                std::cout << RED<<"No available requests" << RESET<<std::endl; //The queues are empty
             }
             // Functionality Children Finder
             

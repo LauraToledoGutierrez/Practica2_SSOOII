@@ -333,7 +333,7 @@ void printResults(Request req, double time_exe)
         file << BLUE << " :: Line " << results[i].getresultLine() << " ";
         file << GREEN << "... " << results[i].getPreviousWord() << " ";
         file << RED << req.getwordToSearch() << " ";
-        file << BLUE << results[i].getNextWord() << " ..." << std::endl;
+        file << BLUE << results[i].getNextWord() <<RESET<< " ..." << std::endl;
         file << " El tiempo de ejecucion del cliente " << req.getIdClient() << " es de " << time_exe << " segundos.\n ";
 
         counter++;

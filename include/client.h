@@ -11,12 +11,13 @@
 
 #include "request.h"
 #include "./definitions.h"
+#include "./colors.h"
 
 /*External methods and variables from the SSOOIIGLE.cpp defined*/
 extern std::vector<Request> clientRequestFree;
 extern std::vector<Request> requestsDone;
 extern std::vector<Request> clientRequestPremium;
-extern void printResults(Request req);
+extern void printResults(Request req, double time_exe);
 extern std::vector<std::string> readFile(std::string bookPath);
 extern void findWord(int nbook, int iteration, std::vector<std::string> vector, int lowerLimit, int uppwerLimit, Request requestCurrent);
 extern void systemPay();
@@ -40,16 +41,20 @@ public:
      * *************************************/
     void operator()()
     {
+        double t0, t1;
+        //Calculate total search time for the client 
+        double totalTime;
         std::vector<std::string> dictionary = {"casa", "telefono", "final"}; // Dictionary of all the available words to be searched
         srand(time(NULL));
         int wordToSearch = rand() % dictionary.size(); // Pick a random word from the dictionary
         int idRequest = g_id_request++;                // Assign a unique ID for this Request
-        std::cout << "Client: " << idClient << " type: " << typeClient << " and searching word: " << dictionary[wordToSearch] << " has been launched." << std::endl;
+        std::cout << "Client: " <<RED<<idClient<<RESET<< " type: " <<GREEN<<typeClient<<RESET << " and searching word: " << BLUE<<dictionary[wordToSearch] <<RESET<< " has been launched." << std::endl;
         Request request(idRequest, idClient, dictionary[wordToSearch], typeClient); // Initialize the request
 
         /** Different implementations for different kind of clients **/
         if (typeClient == 2)
         {
+            t0 = clock();
             mutexAlgo.lock();
             std::unique_lock<std::mutex> uniLockQRequests(mutexQRequests); //* Mutual exclusion for enqueueing Requests
             clientRequestFree.push_back(std::move(request));
@@ -62,7 +67,9 @@ public:
                 /*If the client ID from the finalized requests is the same than ours*/
                 if (requestsDone[i].getIdClient() == idClient)
                 { 
-                    printResults(requestsDone[i]);
+                    t1 = clock();
+                    totalTime = (t1 - t0) / CLOCKS_PER_SEC;
+                    printResults(requestsDone[i], totalTime);
                 }
             }
             mutexAlgo.unlock();
@@ -70,6 +77,7 @@ public:
         /** If client is Premium or Premium Plus **/
         else
         {
+            t0 = clock();
             std::unique_lock<std::mutex> uniLockQRequests(mutexQRequests);
             clientRequestPremium.push_back(std::move(request)); // Enqueue requests on the premium requests queue
             cvClient.notify_one();
@@ -79,7 +87,9 @@ public:
             {
                 if (requestsDone[i].getIdClient() == idClient)
                 {
-                    printResults(requestsDone[i]);
+                    t1 = clock();
+                    totalTime = (t1 - t0) / CLOCKS_PER_SEC;
+                    printResults(requestsDone[i], totalTime);
                 }
             }
         }
