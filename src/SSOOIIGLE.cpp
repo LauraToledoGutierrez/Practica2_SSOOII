@@ -50,7 +50,7 @@ void launchThreads()
     //Vector to save the differents threads generated
     std::vector<std::thread> vThread;
 
-    std::cout << RED<<"Launch system pay"<<RESET << std::endl;
+    std::cout <<"Pay system has been launched"<<RESET << std::endl;
     //Launchs the thread of system pay
     vThread.push_back(std::thread(std::move(systemPay)));
 
@@ -59,7 +59,7 @@ void launchThreads()
     {
         Finder finder("",0,0,0);
         vThread.push_back(std::thread(std::move(finder)));
-        std::cout << GREEN<<"Launch finder" <<RESET<< std::endl;
+        std::cout <<"Finder has been launched" <<RESET<< std::endl;
     }
     //Launchs the threads of client
     createClient();
@@ -134,8 +134,6 @@ int asignBalance(int typeClient)
  ***********************************/
 void systemPay()
 {
-    // Semaforo para sincronizacion y pasarle el id del cliente
-
     int newBalance = 20;
     std::mutex mutex_pay;
     std::unique_lock<std::mutex> lk(mutex_pay);
@@ -191,6 +189,7 @@ void findWord(int nbook, int iteration, std::vector<std::string> vector, int low
     std::vector<std::vector<Search_Result>> vResults;
     Search_Result results;
     int resultLine;
+    //std::cout <<"Buscando palabra del cliente "<<requestCurrent.getIdClient() <<"..."<<std::endl;
     
     //Gets the client from the request
     int indexClient = compareClient(requestCurrent);
@@ -232,17 +231,16 @@ void findWord(int nbook, int iteration, std::vector<std::string> vector, int low
                 //Adds the search result in the queue
                 requestCurrent.searchResults.push_back(results);
                 //Notifies the finder that it has already done its job 
-                cvFinder.notify_one();
-            
-            //If it still havent found the word but the client is type free and it hasnt balance, its request ends
-            } else if(listClients[indexClient].getTypeClient()==2 && listClients[indexClient].getBalance()<1){
+                cvFinder.notify_one();   
+        }
+         //If it still havent found the word but the client is type free and it hasnt balance, its request ends
+            if(listClients[indexClient].getTypeClient()==2 && listClients[indexClient].getBalance()<1){
                 //Finalices its request
                 requestCurrent.end_Request();
                 requestsDone.push_back(requestCurrent);
                 //Notifies the finder that it has already done its job 
                 cvFinder.notify_one();
             }
-        }
         words.clear();
 
         // FIXME
@@ -265,6 +263,7 @@ void findWord(int nbook, int iteration, std::vector<std::string> vector, int low
         //Notifies to system pay that a thread needs it
         cvPay.notify_one();
     }
+}
 }
 
 /***********************************
