@@ -111,7 +111,7 @@ void launchThreads()
     //Vector to save the differents threads generated
     std::vector<std::thread> vThread;
 
-    std::cout << "Se ha lanzado el sistema de pago" << std::endl;
+    std::cout << RED<<"Lauch system pay"<<RESET << std::endl;
     //Launchs the thread of system pay
     vThread.push_back(std::thread(std::move(systemPay)));
 
@@ -120,7 +120,7 @@ void launchThreads()
     {
         Finder finder("",0,0,0);
         vThread.push_back(std::thread(std::move(finder)));
-        std::cout << "Se ha lanzado el buscador" << std::endl;
+        std::cout << GREEN<<"Launch finder" <<RESET<< std::endl;
     }
     //Launchs the threads of client
     createClient();
