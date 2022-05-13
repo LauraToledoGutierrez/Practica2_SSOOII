@@ -59,9 +59,9 @@ public:
 
             if (random <= 79 && !clientRequestPremium.empty())
             {
-                std::cout<<"ME ABURRO"<<std::endl;
+                //std::cout<<"ME ABURRO"<<std::endl;
                 req = clientRequestPremium.front(); 
-                std::cout << "nose "<<req.getIdClient()<<std::endl;
+                //std::cout << "nose "<<req.getIdClient()<<std::endl;
 
                 //std::unique_lock<std::mutex> lck (mutexNOSE);
                 clientRequestPremium.pop_back();
@@ -69,9 +69,9 @@ public:
             
             else if (random > 79 && !clientRequestFree.empty())
             {
-                std::cout<<"ME ABURRO x2"<<std::endl;
+                //std::cout<<"ME ABURRO x2"<<std::endl;
                 req = clientRequestFree.front();
-                std::cout << "nose "<<req.getIdClient()<<std::endl;
+                //std::cout << "nose "<<req.getIdClient()<<std::endl;
                 //std::unique_lock<std::mutex> lck (mutexNOSE);
                 clientRequestFree.pop_back();
             }
@@ -111,7 +111,7 @@ public:
                     //threadFinder.push_back(finder);
 
                     // Cada hilo realizara el metodo de buscarPalabra
-                    std::cout << "aaaaaaaaaaaaaaaaaaaaaaaa" <<std::endl;
+                    //std::cout << "aaaaaaaaaaaaaaaaaaaaaaaa" <<std::endl;
                     vFinderThreads.push_back(std::thread(findWord, i, j, fileToRead, lowerLimit, upperLimit, req));
                     while (1)
                     {

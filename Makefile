@@ -14,6 +14,7 @@ all: dirs SSOOIIGLE
 dirs:
 	mkdir -p $(DIROBJ) $(DIREXE)
         
+        
 SSOOIIGLE: $(DIROBJ)SSOOIIGLE.o 
 	$(CC) -o $(DIREXE)$@ $^ $(LDLIBS)
 

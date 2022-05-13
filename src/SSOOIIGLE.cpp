@@ -1,12 +1,12 @@
 /*CLASE DONDE SE REALIZARA LA BUSQUEDA*/
 
 /*Includes*/
-#include "./include/request.h"
-#include "./include/definitions.h"
-#include "./include/client.h"
-#include "./include/colors.h"
-#include "./include/finder.h"
-#include "./include/search_result.h"
+#include "request.h"
+#include "definitions.h"
+#include "client.h"
+#include "colors.h"
+#include "finder.h"
+#include "search_result.h"
 
 /*Variables globales*/
 
@@ -57,8 +57,8 @@ int main(int argc, char *argv[])
 
 void createClient()
 {
-    //while (1)
-    //{
+    while (1)
+    {
         for (int i = 0; i < NUMBERCLIENTS; i++)
         {
             mutexBalance.lock();
@@ -72,15 +72,14 @@ void createClient()
             Client client(g_id_client, typeClient, balance, req);
             listClients.push_back(client);
             vThreadClient.push_back(std::thread(std::move(client)));
-            //std::cout<<" PETICION "<<req.getIdClient()<< req.getIdRequest()<<std::endl;
-            std::cout<<"Se han lanzado un cliente  "<<client.getTypeClient()<<" saldo "<<client.getBalance()<<std::endl;
+            //std::cout<<"Se han lanzado un cliente  "<<client.getTypeClient()<<" y busca la palabra "<<req.getwordToSearch()<<std::endl;
             std::this_thread::sleep_for(std::chrono::seconds(1));
             mutexBalance.unlock();
             
         }
         std::this_thread::sleep_for(std::chrono::seconds(15));
         //std::for_each(vThreadClient.begin(), vThreadClient.end(), std::mem_fn(&std::thread::join));
-    //}
+    }
 }
 int asignBalance(int typeClient)
 {
@@ -92,10 +91,10 @@ int asignBalance(int typeClient)
         balance_ = INT_MAX;
         break;
     case 1:
-        balance_ = 1 + rand() % (100 - 1);
+        balance_ = 1 + rand() % (300 - 1);
         break;
     case 2:
-        balance_ = 1 + rand() % (30 - 1);
+        balance_ = 1 + rand() % (150 - 1);
         break;
     }
     return balance_;
@@ -169,11 +168,13 @@ void findWord(int nbook, int iteration, std::vector<std::string> vector, int low
     std::vector<std::vector<Search_Result>> vResults;
     Search_Result results;
     int resultLine;
+
+    
+
     //std::cout <<"EEEEEEEEEEEEEEY"<<std::endl;
     //std::cout <<upperLimit<<std::endl;
 
     int indexClient = compareClient(requestCurrent);
-    std::cout <<indexClient<<std::endl;
 
     // IMPLEMENTATION OF FINDING WORD
     for (int i = lowerLimit; i < upperLimit; i++)
@@ -188,10 +189,11 @@ void findWord(int nbook, int iteration, std::vector<std::string> vector, int low
 
         /*Recorremos las palabras de la linea*/
         for (int j = 0; j < words.size(); j++)
-        {
+        {            
             /*Si la palabra que estamos mirando es igual a la que buscamos*/
             if (words[j].compare(requestCurrent.getwordToSearch()) == 0 && listClients[indexClient].getBalance() > 0)
             {
+                std::cout <<"EEEEEEEEEEEEEEY"<<std::endl;
                 mutexReduceBalance.lock();
                 listClients[indexClient].setBalance(listClients[indexClient].getBalance()-1);
                 mutexReduceBalance.unlock();
@@ -245,7 +247,6 @@ void findWord(int nbook, int iteration, std::vector<std::string> vector, int low
 int compareClient(Request request)
 {
     int i;
-    std::cout <<"COMPARAR"<<std::endl;
     for (i = 0; i < listClients.size(); i++)
     {
         if (listClients[i].getidClient() == request.getIdClient())

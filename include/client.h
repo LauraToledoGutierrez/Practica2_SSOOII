@@ -42,12 +42,13 @@ public:
         srand(time(NULL));
         int wordToSearch= rand()%dictionary.size();
         int idRequest= g_id_request++;
-        std::cout <<"Se ha creado un cliente "<<dictionary[wordToSearch] <<std::endl;
+        std::cout<<"Se ha lanzado el cliente "<<idClient<<" de tipo "<<typeClient<< " y busca la palabra "<<dictionary[wordToSearch]<<std::endl;
+        std::cout << balance<<std::endl;
         Request request(idRequest, idClient, dictionary[wordToSearch], typeClient);
 
         if(typeClient==2){
             mutexAlgo.lock();
-            std::cout<<"HOLA"<<std::endl;
+            //std::cout<<"HOLA"<<std::endl;
             std::unique_lock<std::mutex> uniLockQRequests(mutexQRequests); //* Mutual exclusion for enqueueing Requests
             clientRequestFree.push_back(std::move(request));
             cvClient.notify_one(); //*Notify Finder thread so that they search into the queue
@@ -63,7 +64,7 @@ public:
 
         }
         else{
-            std::cout<<"ADIOS"<<std::endl;
+            //std::cout<<"ADIOS"<<std::endl;
             std::unique_lock<std::mutex> uniLockQRequests(mutexQRequests);
             clientRequestPremium.push_back(std::move(request));
             cvClient.notify_one();
