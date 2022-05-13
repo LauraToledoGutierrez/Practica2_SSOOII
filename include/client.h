@@ -59,7 +59,7 @@ public:
                     printResults(requestsDone[i]);
                 }
             }
-            mutexAlgo.lock();
+            mutexAlgo.unlock();
 
         }
         else{

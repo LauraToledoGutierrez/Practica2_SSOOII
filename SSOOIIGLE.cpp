@@ -57,8 +57,8 @@ int main(int argc, char *argv[])
 
 void createClient()
 {
-    while (1)
-    {
+    //while (1)
+    //{
         for (int i = 0; i < NUMBERCLIENTS; i++)
         {
             mutexBalance.lock();
@@ -80,7 +80,7 @@ void createClient()
         }
         std::this_thread::sleep_for(std::chrono::seconds(15));
         //std::for_each(vThreadClient.begin(), vThreadClient.end(), std::mem_fn(&std::thread::join));
-    }
+    //}
 }
 int asignBalance(int typeClient)
 {
@@ -169,12 +169,16 @@ void findWord(int nbook, int iteration, std::vector<std::string> vector, int low
     std::vector<std::vector<Search_Result>> vResults;
     Search_Result results;
     int resultLine;
+    //std::cout <<"EEEEEEEEEEEEEEY"<<std::endl;
+    //std::cout <<upperLimit<<std::endl;
 
     int indexClient = compareClient(requestCurrent);
+    std::cout <<indexClient<<std::endl;
 
     // IMPLEMENTATION OF FINDING WORD
     for (int i = lowerLimit; i < upperLimit; i++)
     {
+        //std::cout <<"EEEEEEEEEEEEEEY"<<std::endl;
         std::string line = eraseSymbols(vector[i]);
         /*Transformamos todas v_hilosas palabras de la linea en minusculas*/
         std::transform(line.begin(), line.end(), line.begin(), ::tolower);
@@ -205,13 +209,15 @@ void findWord(int nbook, int iteration, std::vector<std::string> vector, int low
                 else
                     results.setNextWord(words[j + 1]);
 
+
                 /*Metemos los resultados en la cola resultados*/
                 // queueResults.push(results);
 
                 requestCurrent.searchResults[nbook].push_back(results);
-
+            //!AQUI HAY ERROR CREO POR QUE SI PONES PRINT DA VIOLACION DE SEGMENTO
             } else if(listClients[indexClient].getTypeClient()==2 && listClients[indexClient].getBalance()<1){
                 //TODO printf
+                //printf("NO TIENE SALDO");
                 requestCurrent.end_Request();
                 requestsDone.push_back(requestCurrent);
                 cvFinder.notify_one();
@@ -239,6 +245,7 @@ void findWord(int nbook, int iteration, std::vector<std::string> vector, int low
 int compareClient(Request request)
 {
     int i;
+    std::cout <<"COMPARAR"<<std::endl;
     for (i = 0; i < listClients.size(); i++)
     {
         if (listClients[i].getidClient() == request.getIdClient())

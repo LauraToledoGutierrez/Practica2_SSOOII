@@ -22,7 +22,7 @@
 #include <atomic>
 #include <bits/stdc++.h>
 
-#define NUMBERCLIENTS 20
+#define NUMBERCLIENTS 1
 #define NUMBERTHREADS 3
 #define NUMBERFINDER 4
 
@@ -44,6 +44,6 @@ std::condition_variable cvFinder;
 
 std::atomic<int> g_id_request(0);
 std::atomic<int> g_id_client(0);
-std::vector<std::string> books = {"./17-LEYES-DEL-TRABJO-EN-EQUIPO.txt", "./21-LEYES-DEL-LIDERAZGO.txt", "./25-MANERAS-DE-GANARSE-A-LA-GENTE.txt",
-"./ACTITUD-DE-VENDEDOR.txt", "./El-oro-y-la-ceniza.txt", "./La-última-sirena.txt", "./prueba.txt",
-"./SEAMOS-PERSONAS-DE-INFLUENCIA.txt", "./VIVE-TU-SUEÑO.txt"};
+std::vector<std::string> books = {"./Libros_P2/17-LEYES-DEL-TRABJO-EN-EQUIPO.txt", "./Libros_P2/21-LEYES-DEL-LIDERAZGO.txt", "./Libros_P2/25-MANERAS-DE-GANARSE-A-LA-GENTE.txt",
+"./Libros_P2/ACTITUD-DE-VENDEDOR.txt", "./Libros_P2/El-oro-y-la-ceniza.txt", "./Libros_P2/La-última-sirena.txt", "./Libros_P2/prueba.txt",
+"./Libros_P2/SEAMOS-PERSONAS-DE-INFLUENCIA.txt", "./Libros_P2/VIVE-TU-SUEÑO.txt"};

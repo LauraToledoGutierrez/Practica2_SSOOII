@@ -23,9 +23,9 @@ private:
 
 
 public:
-    std::vector<std::string> books = {"./17-LEYES-DEL-TRABJO-EN-EQUIPO.txt", "./21-LEYES-DEL-LIDERAZGO.txt", "./25-MANERAS-DE-GANARSE-A-LA-GENTE.txt",
-                                      "./ACTITUD-DE-VENDEDOR.txt", "./El-oro-y-la-ceniza.txt", "./La-última-sirena.txt", "./prueba.txt",
-                                      "./SEAMOS-PERSONAS-DE-INFLUENCIA.txt", "./VIVE-TU-SUEÑO.txt"};
+    std::vector<std::string> books = {"./Libros_P2/17-LEYES-DEL-TRABJO-EN-EQUIPO.txt", "./Libros_P2/21-LEYES-DEL-LIDERAZGO.txt", "./Libros_P2/25-MANERAS-DE-GANARSE-A-LA-GENTE.txt",
+"./Libros_P2/ACTITUD-DE-VENDEDOR.txt", "./Libros_P2/El-oro-y-la-ceniza.txt", "./Libros_P2/La-última-sirena.txt", "./Libros_P2/prueba.txt",
+"./Libros_P2/SEAMOS-PERSONAS-DE-INFLUENCIA.txt", "./Libros_P2/VIVE-TU-SUEÑO.txt"};
     int tamanio= books.size();
     std::vector<std::thread> vFinderThreads;
 
@@ -63,16 +63,16 @@ public:
                 req = clientRequestPremium.front(); 
                 std::cout << "nose "<<req.getIdClient()<<std::endl;
 
-                std::unique_lock<std::mutex> lck (mutexNOSE);
+                //std::unique_lock<std::mutex> lck (mutexNOSE);
                 clientRequestPremium.pop_back();
             }
             
             else if (random > 79 && !clientRequestFree.empty())
             {
-                std::cout<<"ME ABURRO"<<std::endl;
+                std::cout<<"ME ABURRO x2"<<std::endl;
                 req = clientRequestFree.front();
                 std::cout << "nose "<<req.getIdClient()<<std::endl;
-                std::unique_lock<std::mutex> lck (mutexNOSE);
+                //std::unique_lock<std::mutex> lck (mutexNOSE);
                 clientRequestFree.pop_back();
             }
             else
@@ -80,10 +80,13 @@ public:
                 std::cout << "No available requests" << std::endl;
             }
             // Functionality Children Finder
-
+            
             for (int i = 0; i < books.size(); i++)
             {
                 std::vector<std::string> fileToRead = readFile(books[i]);
+                
+                //std::cout<<"LINREAS"<<lines<<std::endl;
+                //std::cout << "aaaaaaaaaaaaaaaaaaaaaaaa" <<std::endl;
 
                 // METHOD CREATEFINDERTHREADS
                 for (int j = 0; j < NUMBERTHREADS; j++)
@@ -103,16 +106,16 @@ public:
                         upperLimit = (lowerLimit + (fileToRead.size() / NUMBERTHREADS) - 1);
 
                     // Creamos el objeto finder con sus correspondientes valores
+                    //std::cout <<"ALGO "<<upperLimit<<std::endl;
                     Finder finder(req.getwordToSearch(), j, lowerLimit, upperLimit);
                     //threadFinder.push_back(finder);
 
                     // Cada hilo realizara el metodo de buscarPalabra
                     std::cout << "aaaaaaaaaaaaaaaaaaaaaaaa" <<std::endl;
                     vFinderThreads.push_back(std::thread(findWord, i, j, fileToRead, lowerLimit, upperLimit, req));
-
                     while (1)
                     {
-                        cvFinder.wait(uniLockFinderChildren);
+                        cvFinder.wait(uniLockFinderChildren, [] {return !requestsDone.empty();});
                         if (req.getEndRequest())
                         {
                             requestsDone.push_back(req);
@@ -125,7 +128,7 @@ public:
                         }
                     }
                 }
-                std::for_each(vFinderThreads.begin(), vFinderThreads.end(), std::mem_fn(&std::thread::join));
+                std::for_each(vFinderThreads.begin(), vFinderThreads.end(), std::mem_fn(&std::thread::detach));
             }
         }
     }
