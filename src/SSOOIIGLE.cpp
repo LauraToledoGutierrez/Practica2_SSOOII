@@ -111,7 +111,7 @@ void launchThreads()
     //Vector to save the differents threads generated
     std::vector<std::thread> vThread;
 
-    std::cout << RED<<"Lauch system pay"<<RESET << std::endl;
+    std::cout << RED<<"Launch system pay"<<RESET << std::endl;
     //Launchs the thread of system pay
     vThread.push_back(std::thread(std::move(systemPay)));
 
