@@ -1,0 +1,15 @@
+Los clientes los lanza bien, crea bien las peticiones, pero a la hora de buscar las palabras falla
+
+Da violacion del segmento en lo de buscar
+
+Poner coment: cuando el cliente esta en el buscador y que manda la peticion
+
+El saldo a veces se pone a 2147483647
+
+a veces la priemra vez no va la peticion
+
+/*********************************************************************************************************/
+
+PONER TODO EN INGLES
+CAMBIAR LOS COLORES
+PONER COMENTARIOS A LOS METODOS Y DENTRO

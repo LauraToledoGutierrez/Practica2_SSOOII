@@ -1,159 +1,169 @@
-/*CLASE DONDE SE REALIZARA LA BUSQUEDA*/
-
-/*Includes*/
-#include "definitions.h"
-#include "thread"
-#include "finder.h"
-#include "colors.h"
+/*INCLUDES*/
 #include "request.h"
+#include "definitions.h"
 #include "client.h"
-#define NUMEROCLIENTES 10
+#include "colors.h"
+#include "finder.h"
+#include "search_result.h"
 
-/*Variables globales*/
-std::vector<Finder> threadFinder;
+/*GLOBAL VARIABLES*/
 std::queue<Search_Result> queueResults;
-std::queue<Request> clientRequestFree;
-std::queue<Request> clientRequestPremium;
-std::mutex mutex;
-std::vector<std::string> bookPath;
+std::vector<Request> clientRequestFree;
+std::vector<Request> clientRequestPremium;
+std::vector<Client> listClients;
+std::vector<Request> requestsDone;
+std::queue<Client> q_clients_pay;
+std::queue<Client> q_client_find;
 
+/* METHOD DEFINITIONS */
 std::vector<std::string> readFile(std::string bookPath);
 int readLines();
-void createClient(int nLines, int nThread, std::string searchWord, std::vector<std::string> vLines);
-void findWord(int iteration, std::vector<std::string> vector);
+void createClient();
+void findWord(int nbook, int iteration, std::vector<std::string> vector, int lowerLimit, int uppwerLimit, Request requestCurrent);
 std::string eraseSymbols(std::string line);
-void printResults();
+void printResults(Request req);
 void createPath();
+void systemPay();
+void finder();
+int asignBalance(int typeClient);
+void launchThreads();
+int compareClient(Request request);
 
-std::vector<std::string> books = {"17-LEYES-DEL-TRABJO-EN-EQUIPO.txt", "21-LEYES-DEL-LIDERAZGO.txt", "25-MANERAS-DE-GANARSE-A-LA-GENTE.txt",
-                        "ACTITUD-DE-VENDEDOR.txt", "El-oro-y-la-ceniza.txt", "La-última-sirena.txt", "prueba.txt", 
-                        "SEAMOS-PERSONAS-DE-INFLUENCIA.txt", "VIVE-TU-SUEÑO.txt"};
-
-std::vector<std::string> dictionary = {"casa", "telefono", "final"};
-
-
+/***********************************
+ * Method: main()
+ * Description: main method for execution
+ * Parameters: argc, *argv[]
+ ***********************************/
 int main(int argc, char *argv[])
 {
-
-    /*Controla si se introducen los argumentos correctos*/
-    if (argc != 4)
-    {
-        std::cout << RED << "Numero de argumentos incorrecto! <nombre_fichero> <palabra> <numero_hilos>" << std::endl;
-        exit(1);
-    }
-    std::cout << RESET << "\nBienvenido a " << BLUE << "SS" <<RED<< "O"<< YELLOW <<"O"<<BLUE<<"II"<<GREEN<< "GL"<<RED<< "E\n"<<std::endl;
-
-    /*Guardamos los argumentos en variables*/
-    std::string bookPath(argv[1]);
-    std::string searchWord = argv[2];
-    int nThread = atoi(argv[3]);
-
-    //NOTA: RECORRER EL VECTOR DE LIBROS Y LLAMAR X VECES AL METODO -> CREAR METODO APARTE
-
-    std::vector<std::string> vLines = readFile(bookPath);
-    int nLines = vLines.size();
-
-    createClient(nThread, nLines, searchWord, vLines);
-    printResults();
+    std::cout << RESET << "\nBienvenido a " << BLUE << "SS" << RED << "O" << YELLOW << "O" << BLUE << "II" << GREEN << "GL" << RED << "E\n"
+              << RESET<< std::endl;
+    launchThreads();
 }
 
-void createPath()
+/***********************************
+ * Method: launchThreads
+ * Description: Launchs the different type of thread (threads of finder, thread of system pay and threads of clients)
+ ***********************************/
+void launchThreads()
 {
-    std::string path = "Libros_P2/";
-    for (int i = 0; i < (int)books.size(); i++) {
-        bookPath.push_back(path + books[i]);
-    }
-}
-
-// DEPRECATED 
-/*void crearHilos(int numeroHilos,int numeroLineas,std::string palabraBuscada,std::vector<std::string> lineas)
-{
-    std::vector<std::thread> vhilos;
-    for (int i = 0; i < numeroHilos; i++)
-    {
-        int limiteInferior, limiteSuperior;
-
-        //Si es el primer hilo
-        if (i == 0)
-            limiteInferior = 1;
-        else
-            limiteInferior = ((numeroLineas / numeroHilos) * i + 1);
-
-        //Si es el ultimo hilo
-        if (i == numeroHilos - 1)
-            limiteSuperior = numeroLineas;
-        else
-            limiteSuperior = (limiteInferior + (numeroLineas / numeroHilos) - 1);
-
-        std::vector<std::string> vectorParcial;
-        //Creamos el objeto buscador con sus correspondientes valores
-        Buscador buscador(palabraBuscada, i, limiteInferior, limiteSuperior);
-        threadFinder.push_back(buscador);
-
-        for (int j = limiteInferior - 1; j < limiteSuperior; j++)
-        {
-            vectorParcial.push_back(lineas[j]);
-        }
-        //Cada hilo realizara el metodo de buscarPalabra
-        vhilos.push_back(std::thread(findWord, i, vectorParcial));
-    }
-
-    std::for_each(vhilos.begin(), vhilos.end(), std::mem_fn(&std::thread::join));
-}
-*/
-
-void createClient (int nThread,int nLines,std::string searchWord,std::vector<std::string> vLines){
-    std::vector<std::thread> vClients;
-
-    for(int i=0; i<NUMEROCLIENTES; i++){
-
-        srand(time(NULL));
-        int typeClient= rand()%(3-1);
-        int book = rand() % dictionary.size();
-        //El libro de cada cliente no se si lo tenemos que meter en la clase cliente, que supongo, es lo que mas sentido tiene
-        Client client(i, typeClient);
-
-        if(typeClient==2){ //FREE 
-            clientRequestFree.push(client);
-        }
-        else if(typeClient==0){ //PREMIUM
-            
-        }
-        else{ //PREMIUM WITH BALANCE
-
-        }
-
-    }
-}
-
-void launchThreads(){
-    int nThreads = 0;
+    //Vector to save the differents threads generated
     std::vector<std::thread> vThread;
-    for(int i=0; i<nThreads;i+++){
-        if(i==0){
-            vThread.push_back(std::thread(systemPay));
-        }
-        else if(i==1){
-            v_hilos.push_back(std::thread(findWord));
-        }
-        else{
-            //v_hilos.push_back(std::thread(nose));
-            //¿?Sleep para hacer hilos cada x tiempo????
-            std::this_thread::sleep_for(std::chrono::milliseconds(200));
-        }
+
+    std::cout <<"Pay system has been launched"<<RESET << std::endl;
+    //Launchs the thread of system pay
+    vThread.push_back(std::thread(std::move(systemPay)));
+
+    //Launchs the diferents threads of finder
+    for (int i = 0; i < NUMBERFINDER; i++)
+    {
+        Finder finder("",0,0,0);
+        vThread.push_back(std::thread(std::move(finder)));
+        std::cout <<"Finder has been launched" <<RESET<< std::endl;
     }
-
-}
-
-void systemPay(){
-    //Variable condicion cv.wait{return !queue.empty}
-    //Semaforo para sincronizacion y pasarle el id del cliente
-
+    //Launchs the threads of client
+    createClient();
     
-
+    std::for_each(vThreadClient.begin(), vThreadClient.end(), std::mem_fn(&std::thread::join));
 }
 
-/*Leemos el fichero para sacar las lineas*/
+/***********************************
+ * Method: createClient()
+ * Description: Creates the clients of our program with the corresponding attributes. 
+ *  Creates every 15 seconds the defined number of clients.
+ ***********************************/
+void createClient()
+{
+    while (1)
+    {
+        for (int i = 0; i < NUMBERCLIENTS; i++)
+        {
+            //Mutex used to protect the variable "balance"
+            mutexBalance.lock();
+            Request req(0,0,"",0);
+            srand(time(NULL));
+            //Generates client type randomly
+            int typeClient = rand() % (3);
+            //Allocates the balance to the client depends client type
+            int balance = asignBalance(typeClient);
+
+            g_id_client++;
+            //Creates the client with the corresponding attributes 
+            Client client(g_id_client, typeClient, balance, req);
+            listClients.push_back(client);
+            vThreadClient.push_back(std::thread(std::move(client)));
+
+            std::this_thread::sleep_for(std::chrono::seconds(1));
+
+            mutexBalance.unlock();
+        }
+        std::this_thread::sleep_for(std::chrono::seconds(15));
+    }
+}
+
+/***********************************
+ * Method: asignBalance
+ * Description: Calculates the balance of each client depending on what type it is
+ * Parameters: typeClient
+ ***********************************/
+int asignBalance(int typeClient)
+{
+    srand(time(NULL));
+    int balance_;
+    switch (typeClient)
+    {
+    //Premium client with unlimited balance
+    case 0:
+        balance_ = INT_MAX;
+        break;
+    //Premium client with limited balance
+    case 1:
+        balance_ = 1 + rand() % (300 - 1);
+        break;
+    //Free client with limited balance
+    case 2:
+        balance_ = 1 + rand() % (50 - 1);
+        break;
+    }
+    return balance_;
+}
+
+/***********************************
+ * Method: systemPay
+ * Description: System of pay is a sleeper thread, it wakes up when the finder wants recharge the balance of the client
+ ***********************************/
+void systemPay()
+{
+    int newBalance = 20;
+    std::mutex mutex_pay;
+    std::unique_lock<std::mutex> lk(mutex_pay);
+
+    //Infinite loop to keep waiting until a finder needs its service
+    while (1)
+    {
+        //Conditional variable that allows to take clients from the queue "q_clients_pay"
+        cvPay.wait(lk, []
+                   { return !q_clients_pay.empty(); });
+        //Creates a client with the same attributes as the queue client and recharge its balance
+        Client client = q_clients_pay.front();
+        q_clients_pay.pop();
+        std::cout << "El cliente " << client.getidClient() << " esta en el sistema de pago." << std::endl;
+        std::this_thread::sleep_for(std::chrono::milliseconds(500));
+        std::cout << "El cliente " << client.getidClient() << " ya ha recargado su saldo." << std::endl;
+        client.setBalance(newBalance);
+        //Put the client back in the queue "q_client_find"
+        q_client_find.push(client);
+
+        //Notifies the finder that it has already done its job 
+        cvFinder.notify_all();
+    }
+}
+
+/***********************************
+ * Method: readFIle()
+ * Description: Divides the book into lines
+ * Parameters: bookPath 
+ ***********************************/
 std::vector<std::string> readFile(std::string bookPath)
 {
     std::ifstream inputFile(bookPath);
@@ -166,61 +176,126 @@ std::vector<std::string> readFile(std::string bookPath)
     }
     return vLines;
 }
-/*Buscamos la palabra deseada en el libro*/
-void findWord(int iteration, std::vector<std::string> vector)
+
+/***********************************
+ * Method: findWord()
+ * Description: Finds the word in the book.
+ *  This method is implemented to use different threads for the same book
+ * Parameters: nbook, iteration, vector, loweLimit, upperLimit, requestCurrent
+ ***********************************/
+void findWord(int nbook, int iteration, std::vector<std::string> vector, int lowerLimit, int upperLimit, Request requestCurrent) 
 {
     std::vector<std::string> words;
-    std::queue<Search_Result> queueResults;
+    std::vector<std::vector<Search_Result>> vResults;
     Search_Result results;
     int resultLine;
+    //std::cout <<"Buscando palabra del cliente "<<requestCurrent.getIdClient() <<"..."<<std::endl;
+    
+    //Gets the client from the request
+    int indexClient = compareClient(requestCurrent);
 
-    for (int i = 0; i < vector.size(); i++)
+    // IMPLEMENTATION OF FINDING WORD
+    for (int i = lowerLimit; i < upperLimit; i++)
     {
-
         std::string line = eraseSymbols(vector[i]);
-        /*Transformamos todas las palabras de la linea en minusculas*/
+        
+        //Transforms all the words of the line in lowercase
         std::transform(line.begin(), line.end(), line.begin(), ::tolower);
-        /*Troceamos la linea en las palabras*/
+        //Divides the line into words
         std::istringstream trocearLinea(line);
         std::copy(std::istream_iterator<std::string>(trocearLinea), std::istream_iterator<std::string>(), back_inserter(words));
 
-        /*Recorremos las palabras de la linea*/
+        //Loop the words of the line
         for (int j = 0; j < words.size(); j++)
-        {
-            /*Si la palabra que estamos mirando es igual a la que buscamos*/
-            if (words[j].compare(threadFinder[iteration].getSearchedWord()) == 0)
+        {            
+            //If the word it is looking at is the same as the one it is looking for
+            if (words[j].compare(requestCurrent.getwordToSearch()) == 0 && listClients[indexClient].getBalance() > 0)
             {
-                resultLine = threadFinder[iteration].getInitialLine();
-                // std::cout<<"Palabra encontrada en linea "<<i+1+lineaR<<std::endl;
-                results.setresultLine(i + resultLine);
-                /*Si es la primera palabra de la linea*/
+                //Decreases the balance every time there is an occurrence
+                mutexReduceBalance.lock();
+                listClients[indexClient].setBalance(listClients[indexClient].getBalance()-1);
+                mutexReduceBalance.unlock();
+                results.setresultLine(i);
+
+                //If it is the first word of the line
                 if (j == 0)
                     results.setPreviousWord("---");
                 else
                     results.setPreviousWord(words[j - 1]);
-                /*Si es la ultima palabra de la linea*/
+                //If it is the last word of the line
                 if (j == words.size() - 1)
                     results.setNextWord("---");
                 else
                     results.setNextWord(words[j + 1]);
 
-                /*Metemos los resultados en la cola resultados*/
-                queueResults.push(results);
-            }
+                //Adds the search result in the queue
+                requestCurrent.searchResults.push_back(results);
+                //Notifies the finder that it has already done its job 
+                cvFinder.notify_one();   
         }
+         //If it still havent found the word but the client is type free and it hasnt balance, its request ends
+            if(listClients[indexClient].getTypeClient()==2 && listClients[indexClient].getBalance()<1){
+                //Finalices its request
+                requestCurrent.end_Request();
+                requestsDone.push_back(requestCurrent);
+                //Notifies the finder that it has already done its job 
+                cvFinder.notify_one();
+            }
         words.clear();
-    }
 
-    std::lock_guard<std::mutex> lockGuard_(mutex);
-    threadFinder[iteration].setQueueResults(queueResults);
+        // FIXME
+        mutexFinishedThreads.lock();
+        requestCurrent.setFinishedThreads(requestCurrent.getFinishedThreads()+1);
+        mutexFinishedThreads.unlock();
+
+        //FIXME
+        //If all the finder threads have finished their search
+        if(listClients[indexClient].getTypeClient()!=2 && requestCurrent.getFinishedThreads()==(NUMBERTHREADS*books.size())){ 
+            requestCurrent.end_Request();
+            requestsDone.push_back(requestCurrent);
+            cvFinder.notify_one();
+        }
+    }
+    //If its is a client of type premium with limited balance and its balance is 0, it goes to system of pay
+    if (listClients[indexClient].getBalance() == 0 && !requestCurrent.getEndRequest() && listClients[indexClient].getTypeClient() == 1) //Pay System
+    {
+        q_clients_pay.push(listClients[indexClient]);
+        //Notifies to system pay that a thread needs it
+        cvPay.notify_one();
+    }
+}
 }
 
-/*Eliminamos cualquier simbolo que pueda aparecer en el libro que no sea letra*/
+/***********************************
+ * Method: compareClient()
+ * Description: Compares the client ids of the system with the client id of the request. 
+ *  Its help to know who is the client ask for the request
+ * Parameters: request
+ ***********************************/
+int compareClient(Request request)
+{
+    int i;
+    //Loop the list with all clients
+    for (i = 0; i < listClients.size(); i++)
+    {
+        if (listClients[i].getidClient() == request.getIdClient())
+        {
+            return i;
+        }
+    }
+    return 0;
+}
+
+/***********************************
+ * Method: eraseSymbols()
+ * Description: Removes any character that may appear in the book 
+ * Parameters: line
+ ***********************************/
 std::string eraseSymbols(std::string line)
 {
     for (int i = 0, size = line.size(); i < size; i++)
     {
-        /*Si es un caracter, lo eliminamos de la linea*/
+        //If it is a character, it removes it from the line
         if (ispunct(line[i]))
         {
             line.erase(i--, 1);
@@ -229,30 +304,39 @@ std::string eraseSymbols(std::string line)
     }
     return line;
 }
-/*Imprimimos los resultados*/
-void printResults()
+
+/***********************************
+ * Method: printResults()
+ * Description: Prints differents results from differents searches and total search time for each client
+ * Parameters: req, time_exe
+ ***********************************/
+void printResults(Request req, double time_exe)
 {
-    int counter=0;
+    int counter = 0;
+    std::vector<Search_Result> results;
+    std::ofstream file;
 
-    for (int i = 0; i < threadFinder.size(); i++)
+    //Gives the client id of the request
+    std::string id = std::to_string(req.getIdClient());
+    //Creates the path of the new folder where it save the results 
+    std::string path = "./results/client_" + id + ".txt";
+    file.open(path);
+
+    //Gives the results of the request
+    results = req.getSearchResults();
+
+    //Prints the differents results
+    file << BLUE << "[Client: " << req.getIdClient() << " ";
+    for (int i = 0; i < results.size(); i++)
     {
-        std::queue<Search_Result> queue = threadFinder[i].getQueueResults();
+        file << BLUE << " :: Line " << results[i].getresultLine() << " ";
+        file << GREEN << "... " << results[i].getPreviousWord() << " ";
+        file << RED << req.getwordToSearch() << " ";
+        file << BLUE << results[i].getNextWord() <<RESET<< " ..." << std::endl;
+        file << " El tiempo de ejecucion del cliente " << req.getIdClient() << " es de " << time_exe << " segundos.\n ";
 
-        while (!queue.empty())
-        {
-            std::cout << BLUE << "[Hilo: " << threadFinder[i].getId();
-            std::cout << RED << " Inicio: " << threadFinder[i].getInitialLine();
-            std::cout << YELLOW << " - final: " << threadFinder[i].getFinalLine() << "]";
-            std::cout << BLUE << " :: line " << queue.front().getresultLine() << " ";
-            std::cout << GREEN << "... " << queue.front().getPreviousWord() << " ";
-            std::cout << RED << threadFinder[i].getSearchedWord() << " ";
-            std::cout << BLUE << queue.front().getNextWord() << " ..." << std::endl;
-
-            counter++;
-            queue.pop();
-        }
+        counter++;
     }
-    std::cout<<RESET<<"\nLa palabra "<<RED<<threadFinder[0].getSearchedWord()<<RESET<<" aparece " <<PINK<< counter <<RESET<< " veces\n" <<" "<<std::endl;
-    std::cout << RESET << "Fin de " << BLUE << "SS" <<RED<< "O"<< YELLOW <<"O"<<BLUE<<"II"<<GREEN<< "GL"<<RED<< "E"<<std::endl;
 
+    std::cout << RESET << "Fin de " << BLUE << "SS" << RED << "O" << YELLOW << "O" << BLUE << "II" << GREEN << "GL" << RED << "E" << std::endl;
 }
