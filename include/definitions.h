@@ -18,6 +18,7 @@
 #include <iterator>
 #include <sstream>
 #include <mutex>
+#include <pthread.h>
 #include <atomic>
 #include <bits/stdc++.h>
 
@@ -27,10 +28,8 @@
 
 std::vector<std::thread> vThreadClient;
 std::vector<std::string> bookPath;
-
-
-
 std::mutex mutex;
+std::mutex mutexAlgo;
 std::mutex mutexQRequests;
 std::mutex mutexFinderChildren;
 std::mutex mutexReduceBalance;

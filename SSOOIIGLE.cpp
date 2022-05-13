@@ -1,12 +1,12 @@
 /*CLASE DONDE SE REALIZARA LA BUSQUEDA*/
 
 /*Includes*/
-#include "definitions.h"
-#include "client.h"
-#include "colors.h"
-#include "finder.h"
-#include "request.h"
-#include "search_result.h"
+#include "./include/request.h"
+#include "./include/definitions.h"
+#include "./include/client.h"
+#include "./include/colors.h"
+#include "./include/finder.h"
+#include "./include/search_result.h"
 
 /*Variables globales*/
 
@@ -16,39 +16,10 @@ std::vector<Request> clientRequestPremium;
 std::vector<Client> listClients;
 std::vector<Request> requestsDone;
 
-
-std::queue<Client> q_clients_pay;
-std::queue<Client> q_client_find;
-/*std::vector<std::thread> vThreadClient;
-std::vector<std::string> bookPath;
-std::vector<Request> requestsDone;
-
-std::queue<Search_Result> queueResults;
-std::vector<Request> clientRequestFree;
-std::vector<Request> clientRequestPremium;
-std::vector<Client> listClients;
-std::mutex mutex;
-std::mutex mutexQRequests;
-std::mutex mutexFinderChildren;
-std::mutex mutexReduceBalance;
-std::mutex mutexFinishedThreads;
-std::unique_lock<std::mutex> uniLockQRequests(mutexQRequests);
-std::unique_lock<std::mutex> uniLockFinderChildren(mutexFinderChildren);
-
 std::queue<Client> q_clients_pay;
 std::queue<Client> q_client_find;
 
-std::condition_variable cvClient;
-std::condition_variable cvPay;
-std::condition_variable cvFinder;
-
-std::atomic<int> g_id_request(0);
-std::atomic<int> g_id_client(0);
-std::vector<std::string> books = {"./17-LEYES-DEL-TRABJO-EN-EQUIPO.txt", "./21-LEYES-DEL-LIDERAZGO.txt", "./25-MANERAS-DE-GANARSE-A-LA-GENTE.txt",
-"./ACTITUD-DE-VENDEDOR.txt", "./El-oro-y-la-ceniza.txt", "./La-última-sirena.txt", "./prueba.txt",
-"./SEAMOS-PERSONAS-DE-INFLUENCIA.txt", "./VIVE-TU-SUEÑO.txt"};
-*/
-
+std::mutex mutexBalance;
 
 
 std::vector<std::string> readFile(std::string bookPath);
@@ -90,18 +61,25 @@ void createClient()
     {
         for (int i = 0; i < NUMBERCLIENTS; i++)
         {
+            mutexBalance.lock();
             srand(time(NULL));
-            int typeClient = rand() % (3 - 1);
+            Request req(0,0,"",0);
+            int typeClient = rand() % (3);
             int balance = asignBalance(typeClient);
 
             // El libro de cada cliente no se si lo tenemos que meter en la clase cliente, que supongo, es lo que mas sentido tiene
             g_id_client++;
-            Client client(g_id_client, typeClient, balance);
+            Client client(g_id_client, typeClient, balance, req);
             listClients.push_back(client);
-            vThreadClient.push_back(std::thread(client));
-
-            std::this_thread::sleep_for(std::chrono::milliseconds(200));
+            vThreadClient.push_back(std::thread(std::move(client)));
+            //std::cout<<" PETICION "<<req.getIdClient()<< req.getIdRequest()<<std::endl;
+            std::cout<<"Se han lanzado un cliente  "<<client.getTypeClient()<<" saldo "<<client.getBalance()<<std::endl;
+            std::this_thread::sleep_for(std::chrono::seconds(1));
+            mutexBalance.unlock();
+            
         }
+        std::this_thread::sleep_for(std::chrono::seconds(15));
+        //std::for_each(vThreadClient.begin(), vThreadClient.end(), std::mem_fn(&std::thread::join));
     }
 }
 int asignBalance(int typeClient)
@@ -128,15 +106,17 @@ void launchThreads()
     std::vector<std::thread> vThread;
 
     std::cout << "Se ha lanzado el sistema de pago" << std::endl;
-    vThread.push_back(std::thread(systemPay));
+    vThread.push_back(std::thread(std::move(systemPay)));
 
     for (int i = 0; i < NUMBERFINDER; i++)
     {
-        Finder finder;
-        vThread.push_back(std::thread(finder));
+        Finder finder("",0,0,0);
+        vThread.push_back(std::thread(std::move(finder)));
         std::cout << "Se ha lanzado el buscador" << std::endl;
     }
     createClient();
+    
+    std::for_each(vThreadClient.begin(), vThreadClient.end(), std::mem_fn(&std::thread::join));
 }
 
 /* La idea del metodo es crear un bucle infinito que solo se ejecute cuando la cola de clientes pendientes de pago tenga algun elemento, esto
@@ -266,6 +246,7 @@ int compareClient(Request request)
             return i;
         }
     }
+    return 0;
 }
 
 /* La idea de este metodo es que va a ser ejecutado por los buscadores. En este metodo controlamos las peticiones de busqueda y vemos el saldo que

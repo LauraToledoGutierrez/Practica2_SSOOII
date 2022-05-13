@@ -3,6 +3,16 @@
 #include "definitions.h"
 #include "request.h"
 
+extern std::vector<Request> clientRequestFree;
+extern std::vector<Request> requestsDone;
+extern std::vector<Request> clientRequestPremium;
+extern void printResults(Request req);
+extern std::vector<std::string> readFile(std::string bookPath);
+extern void findWord(int nbook, int iteration, std::vector<std::string> vector, int lowerLimit, int uppwerLimit, Request requestCurrent);
+extern void systemPay();
+
+//Request req(0,0,"",0);
+
 class Finder
 {
 private:
@@ -34,36 +44,41 @@ public:
      ***********************************/
     void operator()() 
     {
+        Request req(0,0,"",0);
+        std::mutex mutexNOSE;
+       
         //! NEcesitamos exclusion mutua para sacar de la cola de peticiones
 
         while (1)
         {
-
             cvClient.wait(uniLockQRequests, []
                           { return !clientRequestFree.empty() || !clientRequestPremium.empty(); });
             int random = 1 + rand() % (100 - 1);
-            Request req;
-            if (random <= 79 & !clientRequestPremium.empty())
-            {
-                req = clientRequestPremium.front();
+           // Request req;
+            std::unique_lock<std::mutex> lck (mutexNOSE);
 
-                uniLockQRequests.lock();
+            if (random <= 79 && !clientRequestPremium.empty())
+            {
+                std::cout<<"ME ABURRO"<<std::endl;
+                req = clientRequestPremium.front(); 
+                std::cout << "nose "<<req.getIdClient()<<std::endl;
+
+                std::unique_lock<std::mutex> lck (mutexNOSE);
                 clientRequestPremium.pop_back();
-                uniLockQRequests.unlock();
             }
-            else if (random > 79 & !clientRequestFree.empty())
+            
+            else if (random > 79 && !clientRequestFree.empty())
             {
+                std::cout<<"ME ABURRO"<<std::endl;
                 req = clientRequestFree.front();
-
-                uniLockQRequests.lock();
+                std::cout << "nose "<<req.getIdClient()<<std::endl;
+                std::unique_lock<std::mutex> lck (mutexNOSE);
                 clientRequestFree.pop_back();
-                uniLockQRequests.unlock();
             }
             else
             {
                 std::cout << "No available requests" << std::endl;
             }
-            
             // Functionality Children Finder
 
             for (int i = 0; i < books.size(); i++)
@@ -92,7 +107,7 @@ public:
                     //threadFinder.push_back(finder);
 
                     // Cada hilo realizara el metodo de buscarPalabra
-
+                    std::cout << "aaaaaaaaaaaaaaaaaaaaaaaa" <<std::endl;
                     vFinderThreads.push_back(std::thread(findWord, i, j, fileToRead, lowerLimit, upperLimit, req));
 
                     while (1)
@@ -110,6 +125,7 @@ public:
                         }
                     }
                 }
+                std::for_each(vFinderThreads.begin(), vFinderThreads.end(), std::mem_fn(&std::thread::join));
             }
         }
     }

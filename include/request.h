@@ -67,3 +67,4 @@ class Request{
         this->finishedThreads=finishedThreads;
     }
 };
+

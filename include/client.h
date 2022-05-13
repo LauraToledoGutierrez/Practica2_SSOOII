@@ -1,7 +1,9 @@
 #pragma once
 
-#include <definitions.h>
+#ifndef Client
+
 #include "request.h"
+#include "./definitions.h"
 
 extern std::vector<Request> clientRequestFree;
 extern std::vector<Request> requestsDone;
@@ -34,18 +36,22 @@ public:
      * Version: 1.0
      * Date: 10/04/2022
      * *************************************/
-    void operator()() const
+    void operator()() 
     {
         std::vector<std::string> dictionary = {"casa", "telefono", "final"};
         srand(time(NULL));
         int wordToSearch= rand()%dictionary.size();
         int idRequest= g_id_request++;
+        std::cout <<"Se ha creado un cliente "<<dictionary[wordToSearch] <<std::endl;
         Request request(idRequest, idClient, dictionary[wordToSearch], typeClient);
+
         if(typeClient==2){
+            mutexAlgo.lock();
+            std::cout<<"HOLA"<<std::endl;
             std::unique_lock<std::mutex> uniLockQRequests(mutexQRequests); //* Mutual exclusion for enqueueing Requests
-            clientRequestFree.push_back(request);
+            clientRequestFree.push_back(std::move(request));
             cvClient.notify_one(); //*Notify Finder thread so that they search into the queue
-            uniLockQRequests.unlock();
+            //uniLockQRequests.unlock();
 
             //std::queue<Search_Result> results= clientRequestFree.front().getIdClient().fut.get();
             for(int i=0; i<requestsDone.size(); i++){
@@ -53,13 +59,15 @@ public:
                     printResults(requestsDone[i]);
                 }
             }
+            mutexAlgo.lock();
 
         }
         else{
+            std::cout<<"ADIOS"<<std::endl;
             std::unique_lock<std::mutex> uniLockQRequests(mutexQRequests);
-            clientRequestPremium.push_back(request);
+            clientRequestPremium.push_back(std::move(request));
             cvClient.notify_one();
-            uniLockQRequests.unlock();
+            //uniLockQRequests.unlock();
 
             for(int i=0; i<requestsDone.size(); i++){
                 if(requestsDone[i].getIdClient()==idClient){
@@ -74,7 +82,7 @@ public:
     
 
     Client() {}
-    Client(int idClient, int typeClient, int balance) : idClient(idClient), typeClient(typeClient), balance(balance) {}
+    Client(int idClient, int typeClient, int balance, Request request) : idClient(idClient), typeClient(typeClient), balance(balance), request(request){}
 
     int getidClient()
     {
@@ -102,3 +110,4 @@ public:
     }
 };
 
+#endif
